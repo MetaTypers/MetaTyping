@@ -184,7 +184,21 @@ class TextDisplayer:
                 y += 2
         return char_time_log, word_time_log
 
-    def split_words_on_space_and_newline(self, words):
+    def replace_symbols(self, doc):
+        replace_symbols_mapping = {
+            '’': "'",
+            '“': '"',
+            '”': '"',
+            '—':'-',
+        }
+
+        for symbol in replace_symbols_mapping.keys():
+            if symbol in doc:
+                doc = doc.replace(symbol, replace_symbols_mapping[symbol])
+        return doc
+
+    def split_words_on_space_and_newline(self, doc):
+        words = self.replace_symbols(doc)
         word_list = []
         word = ''
         for char in words:

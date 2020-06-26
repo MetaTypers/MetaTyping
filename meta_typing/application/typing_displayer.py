@@ -40,7 +40,7 @@ class TypingDisplayer:
         '''creates a window for the user to select an input type'''
         input_text_types = ['Typing Drills', 'Type from URL', 'Type from Clipboard']
         input_text_types_window = SelectionWindow(input_text_types)
-        selected_input_option = input_text_types_window.get_response() # returns row value
+        selected_input_option = input_text_types_window.get_output() # returns row value
         return selected_input_option
 
     def get_text_from_drills(self):
@@ -62,6 +62,7 @@ class TypingDisplayer:
         '''proccess the text and fits the text to the screen'''
         # gets the format_text from utilities
         pass
+    
 
     def type_text(self):
         '''text is displayed for the user to type while recording input'''

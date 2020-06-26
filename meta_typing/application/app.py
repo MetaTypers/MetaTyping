@@ -9,6 +9,7 @@ from application.text_displayer import TextDisplayer
 from application.typing_drills import TypingDrills
 from application.speed_reading_displayer import SpeedReadingDisplayer
 from application.meta_typing_displayer import MetaTypingDisplayer
+from application.typing_displayer import TypingDisplayer
 
 
 '''
@@ -30,12 +31,14 @@ class Start(Menu):
             sys.exit(0)
 
         func = {
+            'typing v2': TypingDisplayer,
             'Meta Typing(preview only)': MetaTyping,
             'Typing': Typing,
             'Speed Reading': SpeedReading,
             'Settings': Settings,
             'Exit': exit,
         }
+        self.set_new_screen(Start)
         self.set_functionality(func)
 
 

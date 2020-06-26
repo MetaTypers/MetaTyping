@@ -201,6 +201,7 @@ class SelectionWindow(Window):
 
 def get_text_from_url(stdscr): # -> str
     # TODO checks for valid url outside to scrape
+    # TODO add a trigger option for enter instead of F4 for this case
     url = TextWindow(stdscr, message = 'Enter a URL and F4 when done: ').get_output()
     text = scrape_url(url)
     return text
@@ -231,11 +232,9 @@ def get_text_from_clipboard(stdscr): # -> str
 
 def format_text(raw_text, max_line_height, max_line_width):
     '''proccess the text and fits the text the app'''
-    filtered_text = filter_text(raw_text) # string -> List[str]
-    paragraphs = fit_words_on_screen(filtered_text, max_line_height, max_line_width) # str -> List[List[List[str]]]
-    pass
-    # ex. paragraphs = [[['paragraph 1 line 1'], ['paragraph 1 line 2']], [['paragraph 2 line 1'], ['paragraph 2 line 2']]]
-
+    filtered_text = filter_text(raw_text) # str -> str
+    paragraphs = fit_words_on_screen(filtered_text, max_line_height, max_line_width) # str -> List[List[str]]
+    return paragraphs
 
 def filter_text(text): # str -> str
     replace_symbols_mapping = {
@@ -251,49 +250,61 @@ def filter_text(text): # str -> str
             text = text.replace(symbol, replace_symbols_mapping[symbol])
     return text
 
-
-def fit_words_on_screen(text, max_line_height, max_line_width):
+def fit_words_on_screen(doc, max_line_height, max_line_width):
     '''Takes in a raw text and applies transforms so the text can be displayed
     - format text to screen
         - format width
         - format hight
 
     - output
-        - List of paragraphs each having a list of lines each having a string
-        - List[List[List[str]]]
-        ex. paragraphs = 
-        [
-            [['paragraph 1 line 1'], ['paragraph 1 line 2']],
-            [['paragraph 2 line 1'], ['paragraph 2 line 2']],
-        ]
+        - List of screen each having a list of lines having a string
+        - List[List[str]]
     '''
-    def divide_chunks_by_width(paragraph, max_line_width):
-        line = ''
-        words = paragraph.split()
-        header = False
-        if paragraph[-2:] == '\h':
-            header = True
-        for idx, word in enumerate(words):
-            if len(line) + len(word) + 1 < max_line_width:
-                line += word + ' '
+    def divide_text_by_width(doc, max_line_width):
+        paragraphs = doc.split('\n')
+        essay = []
+        for paragraph in paragraphs:
+            line = ''
+            words = paragraph.split()
+            header = False
+            if paragraph[-2:] == '\h':
+                header = True
+            for idx, word in enumerate(words):
+                if len(line) + len(word) + 1 < max_line_width:
+                    line += word + ' '
+                else:
+                    if header:
+                        line += "\h"
+                    essay.append(line)
+                    line = word + ' '
+                        
+                if idx == len(words) - 1:
+                    essay.append(line)
+        return essay
+
+
+    def divide_text_by_height(essay, max_line_height):
+        screens = []
+        screen = []
+        for idx, line in enumerate(essay):
+            if line[-3:] == '\h ':
+                if screen: # header starts at top
+                    screens.append(screen)
+                    screen = []
+                screen.append(line)
             else:
-                if header:
-                    line += '\h'
-                yield line
-                line = word + ' '
-            if idx == len(words) - 1:
-                yield line
+                if len(screen) < max_line_height:
+                    screen.append(line)
+                else:
+                    screens.append(screen)
+                    screen = []
+                    screen.append(line)
+            if idx == len(essay) - 1:
+                if screen:
+                    screens.append(screen)
+        return screens
 
-    def divide_chunks_by_height(paragraphs, max_line_height):
-        if len(paragraphs) < max_line_height:
-            yield paragraphs
-        else:
-            for idx in range(0, len(paragraphs), max_line_height):
-                yield paragraphs[idx:idx + max_line_height]
-
-    paragraphs = text.split('\n')
-    paragraph_fitted_on_screen = []
-    for paragraph in paragraphs:
-        paragraph_by_width = [*divide_chunks_by_width(paragraph, max_line_width)]
-        paragraph_fitted_on_screen.append([*divide_chunks_by_height(paragraph_by_width, (max_line_height))])
-    return paragraph_fitted_on_screen
+    essay = divide_text_by_width(doc, max_line_width)
+    screens = divide_text_by_height(essay, max_line_height)
+    return screens
+    

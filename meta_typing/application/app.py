@@ -9,7 +9,7 @@ from application.text_displayer import TextDisplayer
 from application.typing_drills import TypingDrills
 from application.speed_reading_displayer import SpeedReadingDisplayer
 from application.meta_typing_displayer import MetaTypingDisplayer
-from application.typing_displayer import TypingDisplayer
+from application.typing_app import TypingApp
 
 
 '''
@@ -31,7 +31,7 @@ class Start(Menu):
             sys.exit(0)
 
         func = {
-            'typing v2': TypingDisplayer,
+            'typing v2': TypingApp,
             'Meta Typing(preview only)': MetaTyping,
             'Typing': Typing,
             'Speed Reading': SpeedReading,

@@ -199,6 +199,29 @@ class SelectionWindow(Window):
     def get_selected_row(self):
         return self.selected_row
 
+class StaticWindow(Window):
+    def __init__(self, stdscr, text):
+        self.stdscr = stdscr
+        self.text = text
+        self.prompt()
+
+    def prompt(self):
+        self.stdscr.clear()
+        max_line_height, max_line_width = self.stdscr.getmaxyx()
+        screens = fit_words_on_screen(self.text, max_line_height, max_line_width)
+        for screen in screens:
+            x = 0
+            y = 0
+            self.stdscr.move(y, x)
+            for lines in screen:
+                self.stdscr.addstr(y, x, lines)
+                y += 1
+                x = 0
+            key = self.stdscr.getch()
+            while not self.enter(key):
+                key = self.stdscr.getch()
+            self.stdscr.clear()
+
 def get_text_from_url(stdscr): # -> str
     # TODO checks for valid url outside to scrape
     # TODO add a trigger option for enter instead of F4 for this case
@@ -282,7 +305,6 @@ def fit_words_on_screen(doc, max_line_height, max_line_width):
                     essay.append(line)
         return essay
 
-
     def divide_text_by_height(essay, max_line_height):
         screens = []
         screen = []
@@ -307,4 +329,54 @@ def fit_words_on_screen(doc, max_line_height, max_line_width):
     essay = divide_text_by_width(doc, max_line_width)
     screens = divide_text_by_height(essay, max_line_height)
     return screens
+
+def analyze_word_time_log(stdscr, word_time_log): # List[Tuple[str, int, bool]] -> None
+    '''collects stats from the word_time_log and displayed them'''
+    word_stats_feedback = get_word_stats_feedback(word_time_log)
+    StaticWindow(stdscr, text = word_stats_feedback)
+
+def get_word_stats_feedback(word_time_log): # List[Tuple[str, int, bool]] -> str
+    '''returns a stats page summarizing the typed words log'''
     
+    def get_fastest_words():
+        fastest_words = time_sorted[-WORDS_VIEWED:]
+        fastest_words_string = ', '.join([str({ele[TYPED_WORD]: ele[TYPED_TIME]}) for ele in fastest_words[::-1]])
+        return fastest_words_string
+    
+    def get_slowest_words():
+        slowest_words = time_sorted[:WORDS_VIEWED]
+        slowest_words_string = ', '.join([str({ele[TYPED_WORD]: ele[TYPED_TIME]}) for ele in slowest_words])
+        return slowest_words_string
+    
+    def get_slowest_correct_words():
+        correct_words = [word for word in word_time_log if word[TYPED_CORRECTLY]]
+        correct_words_sorted = sorted(correct_words, key = lambda x: int(x[TYPED_TIME]))
+        slowest_correct_words = correct_words_sorted[:WORDS_VIEWED]
+        slowest_correct_words_string = ', '.join([str({ele[TYPED_WORD]: ele[TYPED_TIME]}) for ele in slowest_correct_words])
+        return slowest_correct_words_string
+    
+    def get_wpm():
+        return str(sum([int(time) for word, time, accuracy in time_sorted])/len(time_sorted))
+    
+    def get_accuracy():
+        return str(100 * sum([accuracy for word, time, accuracy in time_sorted])/len(time_sorted))
+    
+    def summarize():
+        typed_words_summary = f'Words Typed Summary,\n'\
+                              f'Average WPM: {wpm},\n'\
+                              f'Typing Accuracy: {accuracy},\n'\
+                              f'Fastest typed words: {fastest_words},\n'\
+                              f'Slowest typed words: {slowest_words},\n'\
+                              f'Slowest correctly typed words: {slowest_correct_words}'
+        return typed_words_summary
+    
+    TYPED_WORD, TYPED_TIME, TYPED_CORRECTLY, WORDS_VIEWED = 0, 1, 2, 5
+    time_sorted = sorted(word_time_log, key = lambda x: int(x[TYPED_TIME]))
+    wpm = get_wpm()
+    accuracy = get_accuracy()
+    fastest_words = get_fastest_words()
+    slowest_words = get_slowest_words()
+    slowest_correct_words = get_slowest_correct_words()
+    typed_words_summary = summarize()
+    return typed_words_summary
+   

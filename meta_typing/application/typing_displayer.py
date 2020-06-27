@@ -2,7 +2,8 @@ import curses
 from timeit import default_timer as timer
 from bs4 import BeautifulSoup
 import requests
-from application.utilities import get_text_from_url, get_text_from_clipboard, format_text, SelectionWindow
+from application.utilities import get_text_from_url, get_text_from_clipboard
+from application.utilities import format_text, SelectionWindow, analyze_word_time_log
 
 
 class TypingDisplayer:
@@ -23,7 +24,7 @@ class TypingDisplayer:
         text = self.get_text()
         formatted_text = self._format_text(text) # a utilities function
         char_time_log, word_time_log = self.type_text(formatted_text)
-        #analyze_results()
+        analyze_word_time_log(self.stdscr, word_time_log)
 
     def get_text(self):
         '''user selects an input method that executes to get text from'''

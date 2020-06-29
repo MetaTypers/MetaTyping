@@ -45,12 +45,12 @@ class Window:
         return key == curses.KEY_RIGHT
  
     def enter(self, key):
-        return key == curses.KEY_ENTER or key in [10, 13]
+        return key == curses.KEY_ENTER or key in [10, 13] or key == '\n'
 
     def quit(self, key):
         return key == '\x1b'
 
-    def termination(self, key):
+    def f4(self, key):
         return key == curses.KEY_F4
 
                 
@@ -71,12 +71,21 @@ class TextWindow(Window):
         text - get url, clipboard
         numbers or letters - filters for drills
     '''
-    def __init__(self, stdscr, message = ''):
+    def __init__(self, stdscr, message = '', termination_trigger = 'enter'):
         Window.__init__(self, stdscr)
         self.stdscr = stdscr
         self.message = message
+        self.termination_trigger = termination_trigger
         self.setup()
         self.output = self.prompt()
+
+    def get_termination_trigger(self, char):
+        if self.termination_trigger == 'enter' and self.enter(char):
+            return True
+        elif self.termination_trigger == 'f4' and self.f4(char):
+            return True
+        else:
+            return False
 
     def prompt(self):
         ''' Text will only show until screen fills'''
@@ -103,7 +112,7 @@ class TextWindow(Window):
             if char == curses.KEY_BACKSPACE or char == '\x7f':
                 output = output[:-1]
                 shown_output = shown_output[:-1]
-            elif self.termination(char):
+            elif self.get_termination_trigger(char):
                     return output
             elif char == '\n' or repr(char) == '\n':
                 y += 1 # these 2 commits show how if enter is typed many times, curses does not register change in y
@@ -253,7 +262,7 @@ def scrape_url(url): # str -> str
 
 
 def get_text_from_clipboard(stdscr): # -> str
-    return TextWindow(stdscr, message = 'Paste Clipboard and F4 when done: ').get_output()
+    return TextWindow(stdscr, message = 'Paste Clipboard and F4 when done: ', termination_trigger = 'f4').get_output()
 
 
 def format_text(raw_text, max_line_height, max_line_width):

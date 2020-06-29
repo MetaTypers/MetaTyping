@@ -73,7 +73,7 @@ class TypingDrills:
         '''prompts user for starting letters to apply a filter'''
         message = 'Enter the starting letters for your words: '
         starting_letters = TextWindow(self.stdscr, message = message).get_output()
-        while not str(starting_letters).isalpha():
+        while not str(starting_letters).isalpha() and None:
             starting_letters = TextWindow(self.stdscr, message = message).get_output()
         return starting_letters
 

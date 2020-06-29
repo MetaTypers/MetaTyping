@@ -2,6 +2,7 @@ import curses
 from timeit import default_timer as timer
 from application.utilities import get_text_from_url, get_text_from_clipboard
 from application.utilities import format_text, SelectionWindow, analyze_word_time_log
+from application.typing_drills import TypingDrills
 
 
 class TypingApp:
@@ -49,7 +50,8 @@ class TypingApp:
 
     def _get_text_from_drills(self):
         '''gets the requirements from the user to select a drill'''
-        # Prompts the typing drills class
+        typing_drill = TypingDrills(self.stdscr)
+        return typing_drill.get_word_drill()
         pass
 
     def _get_text_from_url(self):
@@ -69,6 +71,7 @@ class TypingApp:
         '''text is displayed for the user to type while recording input'''
         # TODO refactor, add ways to move up/down lines and left/right pages
         # TODO add a log file to store data over time
+        curses.curs_set(2)
         char_time_log = []
         word_time_log = []
         self.stdscr.attron(curses.color_pair(1))

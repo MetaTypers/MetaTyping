@@ -199,6 +199,9 @@ class SelectionWindow(Window):
     def get_selected_row(self):
         return self.selected_row
 
+    def get_selected_response(self):
+        return self.selection_list[self.selected_row]
+
 class StaticWindow(Window):
     def __init__(self, stdscr, text):
         self.stdscr = stdscr

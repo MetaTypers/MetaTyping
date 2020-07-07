@@ -301,6 +301,22 @@ def safe_split(sentence): # str -> List[word:str]
         words.append(word)
     return words
 
+def paragraphs_split(doc):
+    '''prevents extra space if there is a newline in the middle of a doc'''
+    paragraphs = []
+    paragraph = ''
+    for char in doc:
+        if char == '\n':
+            paragraphs.append(paragraph)
+            paragraph = ''
+        else:
+            if char == ' ' and len(paragraph) == 0:
+                pass
+            else:
+                paragraph += char
+    if paragraph:
+        paragraphs.append(paragraph)
+    return paragraphs
 
 def fit_words_on_screen(doc, max_line_height, max_line_width):
     '''Takes in a raw text and applies transforms so the text can be displayed
@@ -313,7 +329,7 @@ def fit_words_on_screen(doc, max_line_height, max_line_width):
         - List[List[str]]
     '''
     def divide_text_by_width(doc, max_line_width):
-        paragraphs = doc.split('\n')
+        paragraphs = paragraphs_split(doc)
         essay = []
         for paragraph in paragraphs:
             line = ''
@@ -322,17 +338,21 @@ def fit_words_on_screen(doc, max_line_height, max_line_width):
             if paragraph[-2:] == '\h':
                 header = True
             for idx, word in enumerate(words):
-                if len(line) + len(word) + 1 < max_line_width:
+                if len(line) + len(word) + 2 < max_line_width:
                     line += word + ''
                 else:
+                    if word == ' ':
+                        line += word
                     if header:
                         line += "\h"
+        
                     essay.append(line)
-                    line = word + ''
+                    if word == ' ':
+                        line = ''
+                    else:
+                        line = word + ''
                         
                 if idx == len(words) - 1:
-                    if line[0] == ' ':
-                        line = line[1:]
                     essay.append(line)
         return essay
 

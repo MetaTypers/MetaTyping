@@ -1,6 +1,7 @@
 from collections import Counter
 from application.utilities import SelectionWindow, TextWindow
 import os
+import random
 
 class TypingDrills:
 
@@ -14,6 +15,7 @@ class TypingDrills:
         menu = [
             'Bigraphs',
             'Trigraphs',
+            'Speed Drill',
             'Word Bank',
         ]
         return menu
@@ -106,6 +108,8 @@ class TypingDrills:
             word_drill = self.apply_bigraphs_drill(words_list)
         elif exercise_type == 'Trigraphs':
             word_drill = self.apply_trigraphs_drill(words_list)
+        elif exercise_type == 'Speed Drill':
+            word_drill = self.apply_speed_drill(words_list)
         elif exercise_type == 'Word Bank': # pass
             word_drill = words_list
         return word_drill
@@ -138,6 +142,22 @@ class TypingDrills:
                 if combo in word:      
                     three_char_counter[combo] += 1
         return [trigram[0] for trigram in three_char_counter.most_common()]
+
+    def apply_speed_drill(self, word_list):
+        words = random.choices(word_list[:300], k=14)
+        exercise_words = []
+        word_q = []
+        while words:
+            word_p = words.pop(0)
+            for j in range(2):
+                for i in range(2):
+                    for w in word_q:
+                        exercise_words.append(w)
+                for k in range(j + 1):
+                    exercise_words.append(word_p)
+            word_q.append(word_p)
+            exercise_words.append('\n')
+        return exercise_words
 
     def apply_starting_letters(self, word_list, starting_letters):
         if starting_letters:

@@ -1,15 +1,11 @@
 import curses
 import sys
-import glob
 import os
-from timeit import default_timer as timer
-from itertools import zip_longest
 from application.menu import Menu
-from application.text_displayer import TextDisplayer
 from application.typing_drills import TypingDrills
 from application.speed_reading_displayer import SpeedReadingDisplayer
-from application.meta_typing_displayer import MetaTypingDisplayer
 from application.typing_app import TypingApp
+from application.meta_typing_app import MetaTypingApp
 
 
 '''
@@ -31,7 +27,7 @@ class Start(Menu):
             sys.exit(0)
 
         func = {
-            'Meta Typing(preview only)': MetaTyping,
+            'Meta Type v2': MetaTypingApp,
             'Typing': TypingApp,
             'Speed Reading': SpeedReading,
             'Settings': Settings,
@@ -40,26 +36,6 @@ class Start(Menu):
         self.set_new_screen(Start)
         self.set_functionality(func)
         
-
-class SubmitText(Menu):
-    
-    def __init__(self, stdscr):
-        Menu.__init__(self, stdscr)
-        self.stdscr = stdscr
-        self.package_functions()
-        self.display_screen()
-
-    def package_functions(self):
-
-        def about(self):
-            pass
-
-        func = {
-            'Enter URL': (TextDisplayer, 'url'),
-            'Paste Clipboard':  (TextDisplayer, 'clipboard'),
-            'Return To Typing': Typing,
-        }
-        self.set_functionality(func)
 
 class SpeedReading(Menu):
     
@@ -82,25 +58,6 @@ class SpeedReading(Menu):
         self.set_new_screen(Start)
         self.set_functionality(func)
 
-        
-class MetaTyping(Menu):
-    
-    def __init__(self, stdscr):
-        Menu.__init__(self, stdscr)
-        self.stdscr = stdscr
-        self.package_functions()
-        self.display_screen()
-
-    def package_functions(self):
-
-        def about(self):
-            pass
-
-        func = {
-            'Enter URL': (MetaTypingDisplayer, 'url'),
-            'Return To Menu': Start,
-        }
-        self.set_functionality(func)
 
 class Settings(Menu):
 

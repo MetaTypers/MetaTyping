@@ -252,7 +252,7 @@ def scrape_url(url): # str -> str
         wanted_tags = ['p',  'li', 'ul']
         for header in soup.find_all(['h1','h2','h3']):
             # a \h is used to indicate header
-            text += header.get_text() + '\h' + '\n'
+            text += header.get_text() + ' \h' + '\n'
             for elem in header.next_elements:
                 if elem.name and elem.name.startswith('h'):
                     break
@@ -285,6 +285,23 @@ def filter_text(text): # str -> str
             text = text.replace(symbol, replace_symbols_mapping[symbol])
     return text
 
+def safe_split(sentence): # str -> List[word:str]
+    '''used to retains multiple space values'''
+    words = []
+    word = ''
+    for char in sentence:
+        if char == ' ':
+            if word:
+                words.append(word)
+                word = ''
+            words.append(char)
+        else:
+            word += char
+    if word:
+        words.append(word)
+    return words
+
+
 def fit_words_on_screen(doc, max_line_height, max_line_width):
     '''Takes in a raw text and applies transforms so the text can be displayed
     - format text to screen
@@ -300,20 +317,22 @@ def fit_words_on_screen(doc, max_line_height, max_line_width):
         essay = []
         for paragraph in paragraphs:
             line = ''
-            words = paragraph.split()
+            words = safe_split(paragraph)
             header = False
             if paragraph[-2:] == '\h':
                 header = True
             for idx, word in enumerate(words):
                 if len(line) + len(word) + 1 < max_line_width:
-                    line += word + ' '
+                    line += word + ''
                 else:
                     if header:
                         line += "\h"
                     essay.append(line)
-                    line = word + ' '
+                    line = word + ''
                         
                 if idx == len(words) - 1:
+                    if line[0] == ' ':
+                        line = line[1:]
                     essay.append(line)
         return essay
 
@@ -321,7 +340,8 @@ def fit_words_on_screen(doc, max_line_height, max_line_width):
         screens = []
         screen = []
         for idx, line in enumerate(essay):
-            if line[-3:] == '\h ':
+
+            if line[-2:] == '\h':
                 if screen: # header starts at top
                     screens.append(screen)
                     screen = []
@@ -338,8 +358,8 @@ def fit_words_on_screen(doc, max_line_height, max_line_width):
                     screens.append(screen)
         return screens
 
-    essay = divide_text_by_width(doc, max_line_width)
-    screens = divide_text_by_height(essay, max_line_height)
+    long_screen = divide_text_by_width(doc, max_line_width)
+    screens = divide_text_by_height(long_screen, max_line_height)
     return screens
 
 def analyze_word_time_log(stdscr, word_time_log): # List[Tuple[str, int, bool]] -> None

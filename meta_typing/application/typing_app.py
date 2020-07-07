@@ -79,8 +79,8 @@ class TypingApp:
             self.stdscr.clear()
             y, x = 0, 0
             for lines in screen:
-                if lines[-3:] == '\h ':
-                    lines_no_header = lines[:-3]
+                if lines[-2:] == '\h':
+                    lines_no_header = lines[:-2]
                     self.stdscr.attron(curses.color_pair(6))
                     self.stdscr.addstr(y, x,  lines_no_header + ' ')
                 else:
@@ -93,8 +93,8 @@ class TypingApp:
             y, x = 0, 0
 
             for lines in screen: # this loop displayed the text on screen
-                if lines[-3:] == '\h ':
-                    lines = lines[:-3]
+                if lines[-2:] == '\h':
+                    lines = lines[:-2]
                     self.stdscr.attron(curses.color_pair(6))
                     self.stdscr.addstr(y, x,  lines + ' ')
                 else:
@@ -113,13 +113,13 @@ class TypingApp:
                         char_len = 1
                         start_word = timer()
                     start_time = timer()
-                    while char != letter:
+                    while char != letter and char != '`':
                         char = self.stdscr.get_wch()
-                        if char == '`': # an autoskip for not typable char
-                            char = letter
                         if char == '\x1b': # esc key
                             return char_time_log, word_time_log
                         good_accuracy = False
+                    if char == '`': # an autoskip for not typable char
+                        char = letter
                     end_time = timer()
                     delta = end_time - start_time
                     letters += letter
@@ -140,8 +140,7 @@ class TypingApp:
                         char_len += 1
                     if x + 1 < len(lines):  
                         x += 1
-                    else:
-                        x = 0
+
                     self.stdscr.move(y, x)
                 x = 0
                 y += 2

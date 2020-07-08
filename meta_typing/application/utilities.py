@@ -384,8 +384,9 @@ def fit_words_on_screen(doc, max_line_height, max_line_width):
 
 def analyze_word_time_log(stdscr, word_time_log): # List[Tuple[str, int, bool]] -> None
     '''collects stats from the word_time_log and displayed them'''
-    word_stats_feedback = get_word_stats_feedback(word_time_log)
+    word_stats_feedback, slowest_words = get_word_stats_feedback(word_time_log)
     StaticWindow(stdscr, text = word_stats_feedback)
+    return slowest_words
 
 def get_word_stats_feedback(word_time_log): # List[Tuple[str, int, bool]] -> str
     '''returns a stats page summarizing the typed words log'''
@@ -398,14 +399,16 @@ def get_word_stats_feedback(word_time_log): # List[Tuple[str, int, bool]] -> str
     def get_slowest_words():
         slowest_words = time_sorted[:WORDS_VIEWED]
         slowest_words_string = ', '.join([str({ele[TYPED_WORD]: ele[TYPED_TIME]}) for ele in slowest_words])
-        return slowest_words_string
+        slowest_word_stats = [ele[TYPED_WORD] for ele in slowest_words]
+        return slowest_words_string, slowest_word_stats
     
     def get_slowest_correct_words():
         correct_words = [word for word in word_time_log if word[TYPED_CORRECTLY]]
         correct_words_sorted = sorted(correct_words, key = lambda x: int(x[TYPED_TIME]))
         slowest_correct_words = correct_words_sorted[:WORDS_VIEWED]
         slowest_correct_words_string = ', '.join([str({ele[TYPED_WORD]: ele[TYPED_TIME]}) for ele in slowest_correct_words])
-        return slowest_correct_words_string
+        slowest_correct_words_stats = [ele[TYPED_WORD] for ele in slowest_correct_words]
+        return slowest_correct_words_string, slowest_correct_words_stats
     
     def get_wpm():
         return str(sum([int(time) for word, time, accuracy in time_sorted])/len(time_sorted))
@@ -427,8 +430,9 @@ def get_word_stats_feedback(word_time_log): # List[Tuple[str, int, bool]] -> str
     wpm = get_wpm()
     accuracy = get_accuracy()
     fastest_words = get_fastest_words()
-    slowest_words = get_slowest_words()
-    slowest_correct_words = get_slowest_correct_words()
+    slowest_words, slowest_word_stats = get_slowest_words()
+    slowest_correct_words, slowest_correct_words_stats = get_slowest_correct_words()
     typed_words_summary = summarize()
-    return typed_words_summary
+    slowest_words_set = list(set(slowest_word_stats + slowest_correct_words_stats))
+    return typed_words_summary, slowest_words_set
    

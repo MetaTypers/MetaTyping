@@ -3,6 +3,7 @@ from timeit import default_timer as timer
 from application.utilities import get_text_from_url, get_text_from_clipboard
 from application.utilities import format_text, SelectionWindow, analyze_word_time_log
 from application.typing_drills import TypingDrills
+from application.settings_app import apply_setting
 
 
 class TypingApp:
@@ -16,8 +17,9 @@ class TypingApp:
 
     def setup(self):
         self.stdscr.clear()
-        curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
-        curses.init_pair(6, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+        apply_setting()
+        self.stdscr.bkgd(' ', curses.color_pair(1) | curses.A_BOLD)
+        self.stdscr.clear()
         self.stdscr.attron(curses.color_pair(1))
         curses.curs_set(2)
 
@@ -72,6 +74,7 @@ class TypingApp:
         '''text is displayed for the user to type while recording input'''
         # TODO refactor, add ways to move up/down lines and left/right pages
         # TODO add a log file to store data over time
+        self.setup()
         curses.curs_set(2)
         char_time_log = []
         word_time_log = []

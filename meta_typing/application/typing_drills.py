@@ -156,7 +156,6 @@ class TypingDrills:
                 for k in range(j + 1):
                     exercise_words.append(word_p)
             word_q.append(word_p)
-            exercise_words.append('\n')
         return exercise_words
 
     def apply_starting_letters(self, word_list, starting_letters):

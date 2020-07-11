@@ -6,7 +6,7 @@ from application.typing_drills import TypingDrills
 from application.speed_reading_displayer import SpeedReadingDisplayer
 from application.typing_app import TypingApp
 from application.meta_typing_app import MetaTypingApp
-
+from application.settings_app import SettingsApp
 
 '''
     This application contains all the interface menus since each 
@@ -30,7 +30,7 @@ class Start(Menu):
             'Meta Type v2': MetaTypingApp,
             'Typing': TypingApp,
             'Speed Reading': SpeedReading,
-            'Settings': Settings,
+            'Settings': SettingsApp,
             'Exit': exit,
         }
         self.set_new_screen(Start)

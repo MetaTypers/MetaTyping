@@ -5,6 +5,7 @@ import requests
 import spacy
 from application.utilities import get_text_from_url, get_text_from_clipboard, safe_split
 from application.utilities import format_text, SelectionWindow
+from application.settings_app import apply_setting
 
 class MetaTypingApp:
     def __init__(self, stdscr):
@@ -15,14 +16,10 @@ class MetaTypingApp:
         self.start_up()
 
     def setup(self):
+        apply_setting()
+        self.stdscr.bkgd(' ', curses.color_pair(1) | curses.A_BOLD)
         self.stdscr.clear()
-        curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
-        curses.init_pair(2, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
-        curses.init_pair(3, curses.COLOR_BLUE, curses.COLOR_BLACK)
-        curses.init_pair(4, curses.COLOR_RED, curses.COLOR_BLACK)
-        curses.init_pair(5, curses.COLOR_WHITE, curses.COLOR_BLACK)
-        curses.init_pair(6, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-        self.stdscr.attron(curses.color_pair(0))
+        self.stdscr.attron(curses.color_pair(1))
         curses.curs_set(2)
 
     def start_up(self):
@@ -74,6 +71,7 @@ class MetaTypingApp:
     def meta_type(self, screens):
         '''text is displayed for the user to type while recording input'''
         # TODO refactor, add ways to move up/down lines and left/right pages
+        self.setup()
         self.stdscr.clear()
         curses.curs_set(2)
         char_time_log = []

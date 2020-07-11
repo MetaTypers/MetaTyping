@@ -301,23 +301,6 @@ def safe_split(sentence): # str -> List[word:str]
         words.append(word)
     return words
 
-def paragraphs_split(doc):
-    '''prevents extra space if there is a newline in the middle of a doc'''
-    paragraphs = []
-    paragraph = ''
-    for char in doc:
-        if char == '\n':
-            paragraphs.append(paragraph)
-            paragraph = ''
-        else:
-            if char == ' ' and len(paragraph) == 0:
-                pass
-            else:
-                paragraph += char
-    if paragraph:
-        paragraphs.append(paragraph)
-    return paragraphs
-
 def fit_words_on_screen(doc, max_line_height, max_line_width):
     '''Takes in a raw text and applies transforms so the text can be displayed
     - format text to screen
@@ -329,7 +312,7 @@ def fit_words_on_screen(doc, max_line_height, max_line_width):
         - List[List[str]]
     '''
     def divide_text_by_width(doc, max_line_width):
-        paragraphs = paragraphs_split(doc)
+        paragraphs = doc.split('\n')
         essay = []
         for paragraph in paragraphs:
             line = ''

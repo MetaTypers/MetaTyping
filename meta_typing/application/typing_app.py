@@ -173,7 +173,6 @@ class TypingApp:
                 for k in range(j + 1):
                     exercise_words.append(word_p)
             word_q.append(word_p)
-            exercise_words.append('\n')
         return ' '.join(exercise_words)
 
         

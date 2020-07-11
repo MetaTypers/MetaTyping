@@ -233,6 +233,7 @@ class StaticWindow(Window):
             while not self.enter(key):
                 key = self.stdscr.getch()
             self.stdscr.clear()
+        curses.curs_set(2)
 
 def get_text_from_url(stdscr): # -> str
     # TODO checks for valid url outside to scrape

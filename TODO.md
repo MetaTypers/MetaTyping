@@ -1,20 +1,16 @@
 # TODO Goals
 
-## Weekly Goals (6/21/20 - 28/28/20)
+## Weekly Goals (6/29/20 - 7/06/20)
 
   ## Code
   ## Highest Priority
-  - Restructure project using the windows, utilities and app organization
   - Implement MetaTyping
-  ## Low Priority
   - add light and dark themes
-  - add settings file and ways to change, store, and load settings
-  - make it easier to add new drills
+  - add linters
+  - add docstrings
 
 ## Monthly Goals
-  - annotations and docstrings on every class and function as needed
   - tests
-  - linters
   - CI/CD tools (travis or azure?)
   - Docker setup
   - How to guides

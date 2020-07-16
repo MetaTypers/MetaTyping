@@ -18,7 +18,7 @@ class TypingApp:
     def setup(self):
         self.stdscr.clear()
         apply_setting()
-        self.stdscr.bkgd(' ', curses.color_pair(1) | curses.A_BOLD)
+        self.stdscr.bkgd(' ', curses.color_pair(1))
         self.stdscr.clear()
         self.stdscr.attron(curses.color_pair(1))
         curses.curs_set(2)
@@ -152,29 +152,30 @@ class TypingApp:
 
     def type_slowest_words(self, slowest_words):
         '''allows user the option to improve on there slowest words'''
-        response = self.ask_to_type_slowest_words()
-        if response:
-            text = self.prepare_slowest_words_text(slowest_words)
-            formatted_text = self._format_text(text)
-            char_time_log, word_time_log = self.type_text(formatted_text)
-            slowest_words = analyze_word_time_log(self.stdscr, word_time_log)
+        if slowest_words:
+            response = self.ask_to_type_slowest_words()
+            if response:
+                text = self.prepare_slowest_words_text(slowest_words)
+                formatted_text = self._format_text(text)
+                char_time_log, word_time_log = self.type_text(formatted_text)
+                slowest_words = analyze_word_time_log(self.stdscr, word_time_log)
 
     def prepare_slowest_words_text(self, slowest_words):
         '''small drill to improve slowest words through repetition cycling'''
-        slowest_words = [word.strip() for word in slowest_words]
-        exercise_words = []
-        word_q = []
-        while slowest_words:
-            word_p = slowest_words.pop(0)
-            for j in range(2):
-                for i in range(2):
-                    for w in word_q:
-                        exercise_words.append(w)
-                for k in range(j + 1):
-                    exercise_words.append(word_p)
-            word_q.append(word_p)
-        return ' '.join(exercise_words)
-
+        exercise = []
+        boundary = 1
+        while boundary < len(slowest_words):
+            exercise.append(slowest_words[boundary-1])
+            exercise.append(slowest_words[boundary-1])
+            exercise.append(slowest_words[boundary-1])
+            for i in range(boundary):
+                exercise.append(slowest_words[i])
+            for i in range(boundary):
+                exercise.append(slowest_words[i])
+            for i in range(boundary):
+                exercise.append(slowest_words[i])
+            boundary += 1
+        return ''.join(exercise)
         
     def ask_to_type_slowest_words(self):
         '''optional improvement typing window prompts'''

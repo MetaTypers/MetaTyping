@@ -1,55 +1,33 @@
 import curses
 import sys
-from application.menu import Menu
-from application.typing_drills import TypingDrills
-from application.speed_reading_displayer import SpeedReadingDisplayer
 from application.typing_app import TypingApp
-from application.meta_typing_app import MetaTypingApp
 from application.settings_app import SettingsApp
+from application.utilities import SelectionWindow
 
-'''This is the interface that connects the applications together'''
-# TODO put speed reader in a displayer and apply themes to it
 
-class Start(Menu):
+class App():
 
     def __init__(self, stdscr):
-        Menu.__init__(self, stdscr)
-        self.package_functions()
-        self.display_screen()
-
-    def package_functions(self):
-        
-        def exit(self):
-            sys.exit(0)
-
-        func = {
-            'Meta Typing': MetaTypingApp,
-            'Typing': TypingApp,
-            'Speed Reading': SpeedReading,
-            'Settings': SettingsApp,
-            'Exit': exit,
-        }
-        self.set_new_screen(Start)
-        self.set_functionality(func)
-        
-
-class SpeedReading(Menu):
-    
-    def __init__(self, stdscr):
-        Menu.__init__(self, stdscr)
         self.stdscr = stdscr
-        self.package_functions()
-        self.display_screen()
 
-    def package_functions(self):
+    def start(self):
+        start_menu_choice = self.get_start_menu_choice()
+        self.start_menu_action(start_menu_choice)
+        while start_menu_choice != 'Exit':
+            start_menu_choice = self.get_start_menu_choice()
+            self.start_menu_action(start_menu_choice)
 
-        def about(self):
+    def get_start_menu_choice(self):
+        start_menu = ['Typing', 'Settings', 'Exit']
+        start_menu_window = SelectionWindow(self.stdscr, selection_list = start_menu)
+        return start_menu_window.get_selected_response()
+
+    def start_menu_action(self, response):
+        if response == 'Typing':
+            TypingApp(self.stdscr)
+        elif response == 'Settings':
+            SettingsApp(self.stdscr)
+        elif response == 'Exit':
+            sys.exit(0)
+        else:
             pass
-
-        func = {
-            'Enter URL': (SpeedReadingDisplayer, 'url'),
-            'Paste Clipboard':  (SpeedReadingDisplayer, 'clipboard'),
-            'Return To Menu': Start,
-        }
-        self.set_new_screen(Start)
-        self.set_functionality(func)

@@ -1,10 +1,10 @@
 from curses import wrapper
-from application.menu import Menu
-from application.app import Start
+from application.app import App
 
 
 def main(stdscr):
-    Start(stdscr)
+    app = App(stdscr)
+    app.start()
 
 if __name__ == "__main__":
     wrapper(main)

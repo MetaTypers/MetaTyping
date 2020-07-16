@@ -252,7 +252,7 @@ def scrape_url(url): # str -> str
         wanted_tags = ['p',  'li', 'ul']
         for header in soup.find_all(['h1','h2','h3']):
             # a \h is used to indicate header
-            text += header.get_text() + ' \h' + '\n'
+            text += header.get_text() +  '\n'
             for elem in header.next_elements:
                 if elem.name and elem.name.startswith('h'):
                     break
@@ -317,17 +317,14 @@ def fit_words_on_screen(doc, max_line_height, max_line_width):
         for paragraph in paragraphs:
             line = ''
             words = safe_split(paragraph)
-            header = False
-            if paragraph[-2:] == '\h':
-                header = True
+
             for idx, word in enumerate(words):
                 if len(line) + len(word) + 2 < max_line_width:
                     line += word + ''
                 else:
                     if word == ' ':
                         line += word
-                    if header:
-                        line += "\h"
+ 
         
                     essay.append(line)
                     if word == ' ':
@@ -344,18 +341,13 @@ def fit_words_on_screen(doc, max_line_height, max_line_width):
         screen = []
         for idx, line in enumerate(essay):
 
-            if line[-2:] == '\h':
-                if screen: # header starts at top
-                    screens.append(screen)
-                    screen = []
+
+            if len(screen) < max_line_height:
                 screen.append(line)
             else:
-                if len(screen) < max_line_height:
-                    screen.append(line)
-                else:
-                    screens.append(screen)
-                    screen = []
-                    screen.append(line)
+                screens.append(screen)
+                screen = []
+                screen.append(line)
             if idx == len(essay) - 1:
                 if screen:
                     screens.append(screen)
@@ -367,9 +359,12 @@ def fit_words_on_screen(doc, max_line_height, max_line_width):
 
 def analyze_word_time_log(stdscr, word_time_log): # List[Tuple[str, int, bool]] -> None
     '''collects stats from the word_time_log and displayed them'''
-    word_stats_feedback, slowest_words = get_word_stats_feedback(word_time_log)
-    StaticWindow(stdscr, text = word_stats_feedback)
-    return slowest_words
+    if word_time_log:
+        word_stats_feedback, slowest_words = get_word_stats_feedback(word_time_log)
+        StaticWindow(stdscr, text = word_stats_feedback)
+        return slowest_words
+    else:
+        return None
 
 def get_word_stats_feedback(word_time_log): # List[Tuple[str, int, bool]] -> str
     '''returns a stats page summarizing the typed words log'''

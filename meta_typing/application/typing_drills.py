@@ -87,10 +87,9 @@ class TypingDrills:
             file_name, word_amount, starting_letters = exercise_parameters
 
         words = self.get_word_list(file_name)
-        words_filtered_1 = self.apply_word_drill(words, exercise_type)
-        words_filtered_2 = self.apply_starting_letters(words_filtered_1, starting_letters)
-        words_filtered_3 = self.apply_word_amount(words_filtered_2, word_amount)
-        return words_filtered_3
+        words_filtered = self.apply_word_drill(words, exercise_type)
+        words_filtered_2 = self.apply_word_amount(words_filtered, word_amount)
+        return words_filtered_2
 
     def get_word_list(self, file_name): # str -> list
         '''Opens a file and returns the contents'''
@@ -157,15 +156,6 @@ class TypingDrills:
                     exercise_words.append(word_p)
             word_q.append(word_p)
         return exercise_words
-
-    def apply_starting_letters(self, word_list, starting_letters):
-        if starting_letters:
-            return self.filter_by_starting_letter(word_list, starting_letters)
-        else:
-            return word_list
-
-    def filter_by_starting_letter(self, word_list, starting_letters):
-        return [word for word in word_list if word[0] in starting_letters]
 
     def apply_word_amount(self, word_list, word_amount):
         return word_list[:int(word_amount)]

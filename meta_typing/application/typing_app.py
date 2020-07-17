@@ -1,7 +1,7 @@
 import curses
 from timeit import default_timer as timer
-from application.utilities import get_text_from_url, get_text_from_clipboard
-from application.utilities import format_text, SelectionWindow, analyze_word_time_log
+from application.utilities import get_text_from_url, get_text_from_clipboard, format_text
+from application.utilities import SelectionWindow, analyze_word_time_log, TextWindow
 from application.typing_drills import TypingDrills
 from application.settings_app import apply_setting
 
@@ -31,6 +31,7 @@ class TypingApp:
         '''combines all the typing application components that execute on start'''
         text = self.get_text()
         formatted_text = self._format_text(text)
+        self.get_typing_options()
         self.type_text(formatted_text)
         slowest_words = analyze_word_time_log(self.stdscr, self.word_time_log)
         self.type_slowest_words(slowest_words)
@@ -73,6 +74,102 @@ class TypingApp:
         '''proccess the text and fits the text to the screen'''
         max_line_height, max_line_width = self.stdscr.getmaxyx()
         return format_text(raw_text, max_line_height // 2, max_line_width)
+
+    def get_typing_options(self):
+        self.type_ahead()
+
+    def type_ahead(self):
+        question = 'Would you like to practice reading ahead and typing?'
+        options = ['No', 'Yes']
+        boolean_window =  SelectionWindow(self.stdscr, static_message = question, selection_list = options)
+        self.type_ahead_amount = boolean_window.get_selected_row()
+        if self.type_ahead_amount == 1:
+            self.get_type_ahead_amount()
+
+    def get_type_ahead_amount(self):
+        '''prompts user for an integer for blank amount'''
+        message = 'Enter the amount of spaces you would like to type ahead: '
+        blank_amount = TextWindow(self.stdscr, message = message).get_output()
+        while not str(blank_amount).isdigit():
+            blank_amount = TextWindow(self.stdscr, message = message).get_output()
+        self.type_ahead_amount = int(blank_amount)
+
+    def type_ahead_line(self, line):
+        self.x = 0
+        self.stdscr.addstr(self.y, self.x, line) 
+        self.stdscr.move(self.y, self.x)
+        letters = ''
+        good_accuracy_word = [] # checks if every char was typed correctly
+        blank_spots = self.type_ahead_amount
+        '''
+        instead get a temp value of the string, replace it with blank then after next interation put it back
+
+        '''
+        for idx, letter in enumerate(line): # loop where for typing
+            if self.x + blank_spots < len(line) and self.x > blank_spots:
+                temp_str = line[idx:idx+blank_spots]
+                blank_str = ' '*blank_spots
+                self.stdscr.addstr(self.y, self.x, blank_str)
+                self.stdscr.move(self.y, self.x)
+            good_accuracy = True
+            char = self.stdscr.get_wch()
+            if idx == 0:
+                char_len = 1
+                start_word = timer()
+            start_time = timer()
+            while char != letter and char != '`':
+
+                if self.x + blank_spots < len(line):
+                    temp_str = line[idx:idx+blank_spots]
+                    blank_str = ' '*blank_spots
+                    self.stdscr.addstr(self.y, self.x, temp_str, curses.COLOR_RED)
+                    self.stdscr.move(self.y, self.x)
+
+                if char == curses.KEY_DOWN:
+                    return 'next line'
+                if char == curses.KEY_UP:
+                    return 'prev line'
+                if char == curses.KEY_RIGHT:
+                    return 'next page'
+                if char == curses.KEY_LEFT:
+                    return 'prev page'
+                if char == '\x1b':
+                    return 'exit'
+                char = self.stdscr.get_wch()
+                if self.x + blank_spots < len(line):
+                    self.stdscr.addch(self.y, self.x, ' ', curses.color_pair(2))
+                good_accuracy = False
+            if char == '`': # an autoskip for not typable char
+                char = letter
+            end_time = timer()
+            delta = end_time - start_time
+            letters += letter
+            good_accuracy_word.append(good_accuracy)
+            self.char_time_log.append((char, delta, good_accuracy))
+            if char == ' ' or idx == len(line) - 1:
+                end_word = timer()
+                delta_word = end_word - start_word
+                wpm = str(round((60 / (delta_word / char_len))/5))
+                if char_len > 2:
+                    self.stdscr.addstr(self.y+1, self.x-char_len + 1, wpm, curses.color_pair(2))
+                char_len = 1
+                self.word_time_log.append((letters, wpm, all(good_accuracy_word)))
+                letters = ''
+                good_accuracy_word = []
+                start_word = timer()
+            else:
+                char_len += 1
+            if self.x + 1 < len(line):
+                self.x += 1
+
+            self.stdscr.move(self.y, self.x)
+
+            if self.x-1 + blank_spots < len(line):
+                temp_str = line[idx:idx+blank_spots]
+                blank_str = ' '*blank_spots
+                self.stdscr.addstr(self.y, self.x-1, temp_str)
+                self.stdscr.move(self.y, self.x)
+        return 'next line'
 
     def type_line(self, line):
         self.x = 0
@@ -132,7 +229,10 @@ class TypingApp:
         line_index, line_amount = 0, len(screen)
         while line_index < line_amount:
             line = screen[line_index]
-            navigation_code = self.type_line(line)
+            if self.type_ahead_amount == 0:
+                navigation_code = self.type_line(line)
+            else:
+                navigation_code = self.type_ahead_line(line)
             if navigation_code == 'exit':
                 return 'exit'
             elif navigation_code == 'next line':

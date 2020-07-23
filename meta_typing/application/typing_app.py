@@ -35,6 +35,7 @@ class TypingApp:
         self.type_text(formatted_text)
         slowest_words = analyze_word_time_log(self.stdscr, self.word_time_log)
         self.type_slowest_words(slowest_words)
+        self.write_char_log()
 
     def get_text(self):
         '''user selects an input method that executes to get text from'''
@@ -102,7 +103,6 @@ class TypingApp:
         boolean_window =  SelectionWindow(self.stdscr, static_message = question, selection_list = options)
         self.unit_type_bool = boolean_window.get_selected_row()
 
-
     def type_ahead_line(self, line):
         self.x = 0
         self.stdscr.addstr(self.y, self.x, line) 
@@ -148,13 +148,14 @@ class TypingApp:
                 if self.x + blank_spots < len(line):
                     self.stdscr.addch(self.y, self.x, ' ', curses.color_pair(2))
                 good_accuracy = False
-            if char == '`': # an autoskip for not typable char
-                char = letter
             end_time = timer()
             delta = end_time - start_time
             letters += letter
             good_accuracy_word.append(good_accuracy)
-            self.char_time_log.append((char, delta, good_accuracy))
+            if char == '`': # an autoskip for not typable char
+                char = letter
+            else:
+                self.char_time_log.append((char, delta, good_accuracy))
             if char == ' ' or idx == len(line) - 1:
                 end_word = timer()
                 delta_word = end_word - start_word
@@ -209,13 +210,14 @@ class TypingApp:
                     return 'exit'
                 char = self.stdscr.get_wch()
                 good_accuracy = False
-            if char == '`': # an autoskip for not typable char
-                char = letter
             end_time = timer()
             delta = end_time - start_time
             letters += letter
             good_accuracy_word.append(good_accuracy)
-            self.char_time_log.append((char, delta, good_accuracy))
+            if char == '`': # an autoskip for not typable char
+                char = letter
+            else:
+                self.char_time_log.append((char, delta, good_accuracy))
             if char == ' ' or idx == len(line) - 1:
                 end_word = timer()
                 delta_word = end_word - start_word
@@ -262,13 +264,14 @@ class TypingApp:
                     return 'exit'
                 char = self.stdscr.get_wch()
                 good_accuracy = False
-            if char == '`': # an autoskip for not typable char
-                char = letter
             end_time = timer()
             delta = end_time - start_time
             letters += letter
             good_accuracy_word.append(good_accuracy)
-            self.char_time_log.append((char, delta, good_accuracy))
+            if char == '`': # an autoskip for not typable char
+                char = letter
+            else:
+                self.char_time_log.append((char, delta, good_accuracy))
             if char == ' ' or idx == len(line) - 1:
                 end_word = timer()
                 delta_word = end_word - start_word
@@ -375,3 +378,9 @@ class TypingApp:
         boolean_window = SelectionWindow(self.stdscr, static_message = question, selection_list = options)
         response = boolean_window.get_selected_row()
         return response
+
+    def write_char_log(self):
+        with open('../logs/char_log.txt', 'a') as f:
+            for line in self.char_time_log:
+                output = ' '.join([str(item) for item in line])
+                f.write(output+'\n')

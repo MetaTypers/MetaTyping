@@ -77,6 +77,8 @@ class TypingApp:
 
     def get_typing_options(self):
         self.type_ahead()
+        if not self.type_ahead_amount:
+            self.unit_type()
 
     def type_ahead(self):
         question = 'Would you like to practice reading ahead and typing?'
@@ -93,6 +95,13 @@ class TypingApp:
         while not str(blank_amount).isdigit():
             blank_amount = TextWindow(self.stdscr, message = message).get_output()
         self.type_ahead_amount = int(blank_amount)
+
+    def unit_type(self):
+        question = 'Would you like to practice unit typing?'
+        options = ['No', 'Yes']
+        boolean_window =  SelectionWindow(self.stdscr, static_message = question, selection_list = options)
+        self.unit_type_bool = boolean_window.get_selected_row()
+
 
     def type_ahead_line(self, line):
         self.x = 0
@@ -171,6 +180,62 @@ class TypingApp:
                 self.stdscr.move(self.y, self.x)
         return 'next line'
 
+    def unit_type_line(self, line):
+        break_after_n = 1
+        self.x = 0
+        self.stdscr.addstr(self.y, self.x, line) 
+        self.stdscr.move(self.y, self.x)
+        letters = ''
+        good_accuracy_word = [] # checks if every char was typed correctly
+        break_after_n_counter = break_after_n + 1
+        char_len = 1
+        for idx, letter in enumerate(line): # loop where for typing
+            good_accuracy = True
+            char = self.stdscr.get_wch()
+            if break_after_n_counter >  break_after_n:
+                start_word = timer()
+                break_after_n_counter = 1
+            start_time = timer()
+            while char != letter and char != '`':
+                if char == curses.KEY_DOWN:
+                    return 'next line'
+                if char == curses.KEY_UP:
+                    return 'prev line'
+                if char == curses.KEY_RIGHT:
+                    return 'next page'
+                if char == curses.KEY_LEFT:
+                    return 'prev page'
+                if char == '\x1b':
+                    return 'exit'
+                char = self.stdscr.get_wch()
+                good_accuracy = False
+            if char == '`': # an autoskip for not typable char
+                char = letter
+            end_time = timer()
+            delta = end_time - start_time
+            letters += letter
+            good_accuracy_word.append(good_accuracy)
+            self.char_time_log.append((char, delta, good_accuracy))
+            if char == ' ' or idx == len(line) - 1:
+                end_word = timer()
+                delta_word = end_word - start_word
+                wpm = str(round((60 / (delta_word / char_len))/5))
+                if break_after_n_counter == break_after_n:
+                    self.stdscr.addstr(self.y+1, self.x-char_len + 1, wpm, curses.color_pair(2))
+                    char_len = 1
+                self.word_time_log.append((letters, wpm, all(good_accuracy_word)))
+                letters = ''
+                good_accuracy_word = []
+                break_after_n_counter += 1
+                #start_word = timer()
+            else:
+                char_len += 1
+            if self.x + 1 < len(line):
+                self.x += 1
+
+            self.stdscr.move(self.y, self.x)
+        return 'next line'
+
     def type_line(self, line):
         self.x = 0
         self.stdscr.addstr(self.y, self.x, line) 
@@ -230,7 +295,10 @@ class TypingApp:
         while line_index < line_amount:
             line = screen[line_index]
             if self.type_ahead_amount == 0:
-                navigation_code = self.type_line(line)
+                if self.unit_type_bool:
+                    navigation_code = self.unit_type_line(line)
+                else:
+                    navigation_code = self.type_line(line)
             else:
                 navigation_code = self.type_ahead_line(line)
             if navigation_code == 'exit':

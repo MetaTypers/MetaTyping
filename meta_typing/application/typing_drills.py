@@ -48,8 +48,8 @@ class TypingDrills:
         '''prompts user for additional paramters'''
         file_name = self.get_word_list_file_name() # returns name_of_word_list.txt
         word_amount = self.get_word_amount() # an integer
-        word_starting_letters = self.get_word_starting_letters() # string of starting letters
-        additional_paramters = [file_name, word_amount, word_starting_letters]
+        randomize = self.randomization() # 0/1
+        additional_paramters = [file_name, word_amount, randomize]
         return additional_paramters
 
     def get_word_list_file_name(self):
@@ -71,26 +71,27 @@ class TypingDrills:
             word_amount = TextWindow(self.stdscr, message = message).get_output()
         return word_amount
 
-    def get_word_starting_letters(self):
-        '''prompts user for starting letters to apply a filter'''
-        message = 'Enter the starting letters for your words: '
-        starting_letters = TextWindow(self.stdscr, message = message).get_output()
-        while not str(starting_letters).isalpha() and None:
-            starting_letters = TextWindow(self.stdscr, message = message).get_output()
-        return starting_letters
+    def randomization(self):
+        '''prompts user for if they want to randomize words'''
+        question = 'Would you like to randomize the words for the exercise?'
+        options = ['No', 'Yes']
+        boolean_window = SelectionWindow(self.stdscr, static_message = question, selection_list = options)
+        return boolean_window.get_selected_row()
 
     def get_exercise(self, exercise_type, exercise_parameters):
         '''applies the exercise types and parameters to created a word_drill'''
         if exercise_parameters == None:
-            file_name, word_amount, starting_letters = '10000words.txt', 100, None
+            file_name, word_amount, randomization = '10000words.txt', 100, 0
         else:
-            file_name, word_amount, starting_letters = exercise_parameters
-
+            file_name, word_amount, randomization = exercise_parameters
+        
         words = self.get_word_list(file_name)
         words_filtered_1 = self.apply_word_drill(words, exercise_type)
-        words_filtered_2 = self.apply_starting_letters(words_filtered_1, starting_letters)
-        words_filtered_3 = self.apply_word_amount(words_filtered_2, word_amount)
-        return words_filtered_3
+        if randomization == 1:
+            words_filtered_2 = self.randomize_word(words_filtered_1, word_amount)
+        else:
+            words_filtered_2 = self.apply_word_amount(words_filtered_1, word_amount)
+        return words_filtered_2
 
     def get_word_list(self, file_name): # str -> list
         '''Opens a file and returns the contents'''
@@ -158,14 +159,8 @@ class TypingDrills:
             word_q.append(word_p)
         return exercise_words
 
-    def apply_starting_letters(self, word_list, starting_letters):
-        if starting_letters:
-            return self.filter_by_starting_letter(word_list, starting_letters)
-        else:
-            return word_list
-
-    def filter_by_starting_letter(self, word_list, starting_letters):
-        return [word for word in word_list if word[0] in starting_letters]
+    def randomize_word(self, word_list, word_amount):
+        return random.choices(word_list, k=int(word_amount))
 
     def apply_word_amount(self, word_list, word_amount):
         return word_list[:int(word_amount)]

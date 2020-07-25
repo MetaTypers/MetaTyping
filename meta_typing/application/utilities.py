@@ -21,7 +21,7 @@ class Window:
 
     def setup(self):
         curses.curs_set(0)
-        curses.init_pair(9, curses.COLOR_WHITE, curses.COLOR_BLACK)        
+        curses.init_pair(3, curses.COLOR_WHITE, curses.COLOR_BLACK)        
         curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
         curses.init_pair(2, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
         self.stdscr.clear()
@@ -52,17 +52,14 @@ class Window:
 
     def f4(self, key):
         return key == curses.KEY_F4
-
                 
 class TextWindow(Window):
     '''
     text window is designed for getting user input
-
     
     Parameters
         static_message - text shown above where the user inputs text
             - ex. Enter a number: 
-
 
     input = user input
     designed_output = user_input
@@ -73,10 +70,8 @@ class TextWindow(Window):
     '''
     def __init__(self, stdscr, message = '', termination_trigger = 'enter'):
         Window.__init__(self, stdscr)
-        self.stdscr = stdscr
         self.message = message
         self.termination_trigger = termination_trigger
-        self.setup()
         self.output = self.prompt()
 
     def get_termination_trigger(self, char):
@@ -87,25 +82,23 @@ class TextWindow(Window):
         else:
             return False
 
+    def display_text(self, shown_output):
+        self.stdscr.attron(curses.color_pair(1))
+        self.stdscr.addstr(0, 0, self.message)
+        self.stdscr.attron(curses.color_pair(2))
+        self.stdscr.addstr(shown_output)
+        self.stdscr.clrtoeol()
+        self.stdscr.refresh()
+
     def prompt(self):
         ''' Text will only show until screen fills'''
-        self.stdscr.clear()
         self.cursor_on()
-        shown_output = ''
-        output = ''
+        shown_output, output = '', ''
         eol = False
         max_height, max_width = self.stdscr.getmaxyx()
         y, x = self.stdscr.getyx()
         while True:
-            # TODO submit bug to python curses that when an enter is used with
-            # get_wch and addstr that the y position does not auto increment
-            # if you call getyxp
-            self.stdscr.attron(curses.color_pair(1))
-            self.stdscr.addstr(0, 0, self.message)
-            self.stdscr.attron(curses.color_pair(2))
-            self.stdscr.addstr(shown_output)
-            self.stdscr.clrtoeol()
-            self.stdscr.refresh()
+            self.display_text(shown_output)
             if y + 2 > max_height:
                 eol = True 
             char = (self.stdscr.get_wch())
@@ -114,14 +107,13 @@ class TextWindow(Window):
                 shown_output = shown_output[:-1]
             elif self.get_termination_trigger(char):
                     return output
-            elif char == '\n' or repr(char) == '\n':
-                y += 1 # these 2 commits show how if enter is typed many times, curses does not register change in y
+            elif char == '\n':
+                y += 1
                 if y + 2 > max_height:
                     eol = True
                 if not eol:
                     shown_output += (char)
                 output += (char)
-                #y, x = self.stdscr.getyx() # and will cause line error
             elif self.quit(char):
                 sys.exit()
             elif isinstance(char, str) and char.isprintable():
@@ -154,11 +146,10 @@ class SelectionWindow(Window):
         boolean response for paramters
     '''
     def __init__(self, stdscr, static_message = None, selection_list = None):
-        self.stdscr = stdscr
+        Window.__init__(self, stdscr)
         self.static_message = static_message
         self.selection_list = selection_list
         self.selected_row = 0
-        self.setup()
         self.display_screen()
 
 
@@ -167,16 +158,14 @@ class SelectionWindow(Window):
         def highlight_row(self):
             self.stdscr.attron(curses.color_pair(1))
             self.stdscr.addstr(y + row, 0, selection_name)
-            self.stdscr.attron(curses.color_pair(9))
+            self.stdscr.attron(curses.color_pair(3))
 
         if self.static_message:
-            self.stdscr.addstr(0, 0, self.static_message)
-            y, x = self.stdscr.getyx()
-            y += 1
-            x = 0
+            self.stdscr.addstr(0, 0, self.static_message, curses.color_pair(3))
+            y = 1
         else:
             y = 0
-            x = 0
+        x = 0
         for row, selection_name in enumerate(self.selection_list):
             if row == self.selected_row:
                 highlight_row(self)
@@ -185,10 +174,10 @@ class SelectionWindow(Window):
         self.stdscr.refresh()
 
     def move_up(self, key):
-        return self.selected_row > 0 and (key == curses.KEY_UP or key == ord('k'))
+        return self.selected_row > 0 and key == curses.KEY_UP
 
     def move_down(self, key):
-        return self.selected_row < len(self.selection_list) - 1 and (key == curses.KEY_DOWN or key == ord('y'))
+        return self.selected_row < len(self.selection_list) - 1 and key == curses.KEY_DOWN
  
     def enter(self, key):
         return key == curses.KEY_ENTER or key in [10, 13]
@@ -213,7 +202,7 @@ class SelectionWindow(Window):
 
 class StaticWindow(Window):
     def __init__(self, stdscr, text):
-        self.stdscr = stdscr
+        Window.__init__(self, stdscr)
         self.text = text
         self.prompt()
 
@@ -222,8 +211,7 @@ class StaticWindow(Window):
         max_line_height, max_line_width = self.stdscr.getmaxyx()
         screens = fit_words_on_screen(self.text, max_line_height, max_line_width)
         for screen in screens:
-            x = 0
-            y = 0
+            x, y = 0, 0
             self.stdscr.move(y, x)
             for lines in screen:
                 self.stdscr.addstr(y, x, lines)
@@ -237,7 +225,7 @@ class StaticWindow(Window):
 def get_text_from_url(stdscr): # -> str
     # TODO checks for valid url outside to scrape
     # TODO add a trigger option for enter instead of F4 for this case
-    url = TextWindow(stdscr, message = 'Enter a URL and F4 when done: ').get_output()
+    url = TextWindow(stdscr, message = 'Enter a URL and Enter when done: ').get_output()
     text = scrape_url(url)
     return text
 
@@ -252,7 +240,7 @@ def scrape_url(url): # str -> str
         wanted_tags = ['p',  'li', 'ul']
         for header in soup.find_all(['h1','h2','h3']):
             # a \h is used to indicate header
-            text += header.get_text() + ' \h' + '\n'
+            text += header.get_text() +  '\n'
             for elem in header.next_elements:
                 if elem.name and elem.name.startswith('h'):
                     break
@@ -317,17 +305,14 @@ def fit_words_on_screen(doc, max_line_height, max_line_width):
         for paragraph in paragraphs:
             line = ''
             words = safe_split(paragraph)
-            header = False
-            if paragraph[-2:] == '\h':
-                header = True
+
             for idx, word in enumerate(words):
                 if len(line) + len(word) + 2 < max_line_width:
                     line += word + ''
                 else:
                     if word == ' ':
                         line += word
-                    if header:
-                        line += "\h"
+ 
         
                     essay.append(line)
                     if word == ' ':
@@ -344,18 +329,13 @@ def fit_words_on_screen(doc, max_line_height, max_line_width):
         screen = []
         for idx, line in enumerate(essay):
 
-            if line[-2:] == '\h':
-                if screen: # header starts at top
-                    screens.append(screen)
-                    screen = []
+
+            if len(screen) < max_line_height:
                 screen.append(line)
             else:
-                if len(screen) < max_line_height:
-                    screen.append(line)
-                else:
-                    screens.append(screen)
-                    screen = []
-                    screen.append(line)
+                screens.append(screen)
+                screen = []
+                screen.append(line)
             if idx == len(essay) - 1:
                 if screen:
                     screens.append(screen)
@@ -367,9 +347,12 @@ def fit_words_on_screen(doc, max_line_height, max_line_width):
 
 def analyze_word_time_log(stdscr, word_time_log): # List[Tuple[str, int, bool]] -> None
     '''collects stats from the word_time_log and displayed them'''
-    word_stats_feedback, slowest_words = get_word_stats_feedback(word_time_log)
-    StaticWindow(stdscr, text = word_stats_feedback)
-    return slowest_words
+    if word_time_log:
+        word_stats_feedback, slowest_words = get_word_stats_feedback(word_time_log)
+        StaticWindow(stdscr, text = word_stats_feedback)
+        return slowest_words
+    else:
+        return None
 
 def get_word_stats_feedback(word_time_log): # List[Tuple[str, int, bool]] -> str
     '''returns a stats page summarizing the typed words log'''

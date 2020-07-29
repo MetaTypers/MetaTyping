@@ -1,101 +1,72 @@
 import curses
 from application.utilities import SelectionWindow
+import json
 
 
 class SettingsApp:
-    '''Themes are selected, using a theme function
-    The themes.txt is then overwritten
-
-    To add a new theme,
-        - add theme under name under `get_themes_menu'
-        - add a get_****_theme function with the text and background colors
-        - add a the get_****_theme call to 'set_theme'
-    '''
+    '''TODO'''
     def __init__(self, stdscr):
         self.stdscr = stdscr
-        self.themes_menu = self.get_themes_menu()
+        self.color_options = self.get_color_options()
         self.start_up()
 
-    def get_themes_menu(self):
-        '''The themes the user will see and select from'''
-        themes_menu = ['Light', 'Dark']
-        return themes_menu
+    def get_color_options(self):
+        '''The default colors the user will see and select'''
+        return ['BLACK', 'BLUE', 'CYAN', 'GREEN','MAGENTA', 'RED', 'WHITE', 'YELLOW']
 
     def start_up(self):
-        '''executes the settings app for the user to change theme options'''
-        selected_theme = self.get_theme()
-        self.set_theme(selected_theme)
+        text_option = self.change_text_type()
+        color_option = self.change_color()
+        self.apply_color_change(text_option, color_option)
 
-    def get_theme(self):
-        '''creates a window for the user to select a theme option'''
-        question = 'Select a theme'
-        themes_window = SelectionWindow(self.stdscr, static_message = question, selection_list = self.themes_menu)
-        selected_theme = themes_window.get_selected_response()
-        return selected_theme
+    def change_text_type(self):
+        question = 'Change text color'
+        text_types = ['Background', 'Main', 'Secondary']
+        text_types_window = SelectionWindow(self.stdscr, static_message = question, selection_list = text_types)
+        selected_type = text_types_window.get_selected_response()
+        return selected_type
 
-    def set_theme(self, selected_theme):
-        '''links the user selected theme option and overwrites in the settings file'''
-        if selected_theme == 'Light':
-            self.set_light_theme()
-        elif selected_theme == 'Dark':
-            self.set_dark_theme()
-            
-    def set_light_theme(self):
-        '''saves light theme settings to themes.txt'''
-        light_theme = self.get_light_theme()
-        self.write_theme(light_theme)
+    def change_color(self):
+        question = 'Change background color'
+        color_window = SelectionWindow(self.stdscr, static_message = question, selection_list = self.color_options )
+        selected_color = color_window.get_selected_response()
+        return selected_color
 
-    def get_light_theme(self):
-        return 'Light'
+    def apply_color_change(self, selected_type, selected_color):
+        '''reads, updates, writes options back'''
+        color_settings = read_color_settings()
+        updated_colors = self.update_color_change(color_settings, selected_type, selected_color)
+        write_color_settings(updated_colors)
 
-    def set_dark_theme(self):
-        '''saves dark theme settings to themes.txt'''
-        dark_theme = self.get_dark_theme()
-        self.write_theme(dark_theme)
+    def update_color_change(self, color_settings, selected_type, selected_color):
+        for idx in range(len(color_settings)):
+            color_type = str(*color_settings[idx].keys())
+            if color_type == selected_type:
+                color_settings[idx][color_type] = selected_color
+        return color_settings
 
-    def get_dark_theme(self):
-        return 'Dark'
+def read_color_settings():
+    path = f'../settings/colors.json'
+    with open(path, 'r') as f:
+        color_settings = json.load(f)
+    return color_settings
 
-    def write_theme(self, theme):
-        '''writes the theme properties to theme.txt'''
-        path = f'../themes/themes.txt'
-        with open(path, 'w') as f:
-            f.write(theme)
+def write_color_settings(data):
+    path = f'../settings/colors.json'
+    with open(path, 'w') as f:
+        json.dump(data, f)
 
 def apply_setting():
-    '''Reads the themes settings file and applies them'''
-    theme_settings = get_theme_settings()
-    apply_theme_settings(theme_settings)
+    color_settings = read_color_settings()
+    apply_color_settings(color_settings)
 
-def get_theme_settings():
-    '''Opens a file and returns the contents'''
-    path = f'../themes/themes.txt'
-    with open(path, 'r') as f:
-        theme_settings = f.readline().strip()
-    return theme_settings
-
-def apply_theme_settings(theme_settings):
-    '''applies the theme color when called in other applications'''
-    if theme_settings == 'Light':
-        apply_light_theme()
-    elif theme_settings == 'Dark':
-        apply_dark_theme()
-    else:
-        pass
-
-def apply_dark_theme():
-    curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
-    curses.init_pair(2, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
-    curses.init_pair(3, curses.COLOR_BLUE, curses.COLOR_BLACK)
-    curses.init_pair(4, curses.COLOR_RED, curses.COLOR_BLACK)
-    curses.init_pair(5, curses.COLOR_WHITE, curses.COLOR_BLACK)
-    curses.init_pair(6, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-
-def apply_light_theme():
-    curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_WHITE)
-    curses.init_pair(2, curses.COLOR_MAGENTA, curses.COLOR_WHITE)
-    curses.init_pair(3, curses.COLOR_BLUE, curses.COLOR_WHITE)
-    curses.init_pair(4, curses.COLOR_RED, curses.COLOR_WHITE)
-    curses.init_pair(5, curses.COLOR_BLACK, curses.COLOR_WHITE)
-    curses.init_pair(6, curses.COLOR_CYAN, curses.COLOR_WHITE)
-        
+def apply_color_settings(color_settings):
+    background_color = f"COLOR_{color_settings[0]['Background']}"
+    main_color = f"COLOR_{color_settings[1]['Main']}"
+    secondary_color = f"COLOR_{color_settings[2]['Secondary']}"
+    
+    modpart = 'curses'
+    module = __import__(modpart)
+    curses.init_pair(1, getattr(module, main_color), getattr(module, background_color))
+    curses.init_pair(2, getattr(module, secondary_color), getattr(module, background_color))
+    curses.init_pair(3, curses.COLOR_WHITE, getattr(module, background_color))

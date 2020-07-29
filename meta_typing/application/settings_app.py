@@ -39,10 +39,12 @@ class SettingsApp:
         write_color_settings(updated_colors)
 
     def update_color_change(self, color_settings, selected_type, selected_color):
-        for idx in range(len(color_settings)):
-            color_type = str(*color_settings[idx].keys())
-            if color_type == selected_type:
-                color_settings[idx][color_type] = selected_color
+        # for idx in range(len(color_settings)):
+        #     color_type = str(*color_settings[idx].keys())
+        # for color_type, color in color_settings.items():
+        #     if color_type == selected_type:
+        #         color_settings[color_type] = selected_color
+        color_settings[0][selected_type] = selected_color
         return color_settings
 
 def read_color_settings():
@@ -62,8 +64,8 @@ def apply_setting():
 
 def apply_color_settings(color_settings):
     background_color = f"COLOR_{color_settings[0]['Background']}"
-    main_color = f"COLOR_{color_settings[1]['Main']}"
-    secondary_color = f"COLOR_{color_settings[2]['Secondary']}"
+    main_color = f"COLOR_{color_settings[0]['Main']}"
+    secondary_color = f"COLOR_{color_settings[0]['Secondary']}"
     
     modpart = 'curses'
     module = __import__(modpart)

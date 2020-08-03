@@ -35,7 +35,7 @@ class TypingApp:
         self.type_text(formatted_text)
         slowest_words = analyze_word_time_log(self.stdscr, self.word_time_log)
         self.type_slowest_words(slowest_words)
-        self.write_char_log()
+        #self.write_char_log() Released for next patch
 
     def get_text(self):
         '''user selects an input method that executes to get text from'''
@@ -110,10 +110,7 @@ class TypingApp:
         letters = ''
         good_accuracy_word = [] # checks if every char was typed correctly
         blank_spots = self.type_ahead_amount
-        '''
-        instead get a temp value of the string, replace it with blank then after next interation put it back
-
-        '''
+        unit_type = False
         first_word_skip = True
         for idx, letter in enumerate(line): # loop where for typing
             if self.x + blank_spots < len(line) and self.x > blank_spots:
@@ -158,7 +155,7 @@ class TypingApp:
                 char = letter
             else:
                 if not first_word_skip:
-                    self.char_time_log.append((char, delta, good_accuracy))
+                    self.char_time_log.append((char, delta, good_accuracy, unit_type))
             if char == ' ' or idx == len(line) - 1:
                 first_word_skip = False
                 end_word = timer()
@@ -195,13 +192,15 @@ class TypingApp:
         break_after_n_counter = break_after_n + 1
         char_len = 1
         first_word_skip = True
+        unit_type = True
         for idx, letter in enumerate(line): # loop where for typing
             good_accuracy = True
             char = self.stdscr.get_wch()
             if break_after_n_counter > break_after_n:
                 start_word = timer()
                 break_after_n_counter = 1
-            start_time = timer()
+            if idx == 0:
+                start_time = timer()
             while char != letter and char != '`':
                 if char == curses.KEY_DOWN:
                     return 'next line'
@@ -224,12 +223,12 @@ class TypingApp:
                 char = letter
             else:
                 if not first_word_skip:
-                    self.char_time_log.append((char, delta, good_accuracy))
+                    self.char_time_log.append((char, delta, good_accuracy, unit_type))
             if char == ' ' or idx == len(line) - 1:
                 first_word_skip = False
                 end_word = timer()
                 delta_word = end_word - start_word
-                wpm = str(round((60 / ((delta_word + 2*(delta_word/char_len)) / char_len))/5))
+                wpm = str(round((60 / ((delta_word + (delta_word/char_len)) / char_len))/5))
                 if break_after_n_counter == break_after_n:
                     self.stdscr.addstr(self.y+1, self.x-char_len + 1, wpm, curses.color_pair(2))
                     char_len = 1
@@ -253,6 +252,7 @@ class TypingApp:
         letters = ''
         good_accuracy_word = [] # checks if every char was typed correctly
         first_word_skip = True
+        unit_type = False
         for idx, letter in enumerate(line): # loop where for typing
             good_accuracy = True
             char = self.stdscr.get_wch()
@@ -282,7 +282,7 @@ class TypingApp:
                 char = letter
             else:
                 if not first_word_skip:
-                    self.char_time_log.append((char, delta, good_accuracy))
+                    self.char_time_log.append((char, delta, good_accuracy, unit_type))
             if char == ' ' or idx == len(line) - 1:
                 first_word_skip = False
                 end_word = timer()

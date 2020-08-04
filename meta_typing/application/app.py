@@ -2,7 +2,7 @@ import curses
 import sys
 from application.typing_app import TypingApp
 from application.settings_app import SettingsApp
-from application.utilities import SelectionWindow
+from application.windows import SelectionWindow
 
 
 class App():

@@ -1,5 +1,5 @@
 from collections import Counter
-from application.utilities import SelectionWindow, TextWindow
+from application.windows import SelectionWindow, TextWindow
 import os
 import random
 

@@ -35,13 +35,7 @@ class TypingApp:
         formatted_text = self._format_text(text)
         self.get_typing_options()
         self.type_text(formatted_text)
-        word_stats_feedback, slowest_words = analyze_word_time_log(self.stdscr, self.word_time_log)
-
-        max_line_height, max_line_width = self.stdscr.getmaxyx()
-        screens = fit_words_on_screen(word_stats_feedback, max_line_height, max_line_width)
-
-        StaticWindow(self.stdscr, screens = screens)
-        self.type_slowest_words(slowest_words)
+        self.analyze_text()
         #self.write_char_log() Released for next patch
 
     def get_text(self):
@@ -361,6 +355,13 @@ class TypingApp:
                     screen_index-=1
             elif navigation_code == 'exit':
                 return
+
+    def analyze_text(self):
+        word_stats_feedback, slowest_words = analyze_word_time_log(self.stdscr, self.word_time_log)
+        max_line_height, max_line_width = self.stdscr.getmaxyx()
+        screens = fit_words_on_screen(word_stats_feedback, max_line_height, max_line_width)
+        StaticWindow(self.stdscr, screens = screens)
+        self.type_slowest_words(slowest_words)
 
     def type_slowest_words(self, slowest_words):
         '''allows user the option to improve on there slowest words'''

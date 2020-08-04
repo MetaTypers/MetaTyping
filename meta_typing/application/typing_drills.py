@@ -15,7 +15,7 @@ class TypingDrills:
         menu = [
             'Ngraphs',
             'Word Bank',
-            'Speed Drill'
+            'Speed Drills'
         ]
         return menu
 
@@ -39,8 +39,9 @@ class TypingDrills:
         elif exercise_type == 'Word Bank':
             word_bank_response = self.word_bank()
             words = self.get_word_bank(word_bank_response)
-        elif exercise_type == 'Speed Drill':
-            words = self.apply_speed_drill()
+        elif exercise_type == 'Speed Drills':
+            speed_drill_response = self.speed_drills()
+            words = self.get_speed_drill(speed_drill_response)
         return words
 
     def n_graphs(self):
@@ -78,6 +79,59 @@ class TypingDrills:
         elif word_bank_response == 'TenFastFingers':
             word_list = self.get_word_list('tenfastfingers')
         return word_list
+
+    def speed_drills(self):
+        speed_drill_menu = ['Word Breakdown', 'Word Accumulator']
+        speed_drill_window = SelectionWindow(self.stdscr, selection_list = speed_drill_menu)
+        speed_drill_response = speed_drill_window.get_selected_response()
+        return speed_drill_response
+
+    def get_speed_drill(self, speed_drill_response):
+        if speed_drill_response == 'Word Breakdown':
+            word_list = self.word_breakdown()
+        elif speed_drill_response == 'Word Accumulator':
+            word_list = self.word_accumulator()
+        return word_list
+
+    def word_breakdown(self):
+        '''prompts user for a word'''
+        message = 'Enter the word you would like to practice on: '
+        word = TextWindow(self.stdscr, message = message).get_output()
+        while len(word) < 2 or len(word.split()) != 1:
+            word = TextWindow(self.stdscr, message = message).get_output()
+
+        message = 'Enter the amount of times you would like to repeat word parts: '
+        amount = TextWindow(self.stdscr, message = message).get_output()
+        while not str(amount).isdigit():
+            amount = TextWindow(self.stdscr, message = message).get_output()
+        return self.get_word_breakdown(word, int(amount))
+
+    def get_word_breakdown(self, word, repeat_amount):
+        word_list = []
+        for char_amount in range(2, len(word) + 1):
+            i = 0
+            while i + char_amount <= len(word):
+                chunk = word[i:i+char_amount]
+                chunks = [chunk] * repeat_amount
+                word_list.extend(chunks)
+                i += 1
+        return word_list
+
+    def word_accumulator(self):
+        word_list = self.get_word_list('top100')
+        words = random.choices(word_list[:300], k=15)
+        exercise_words = []
+        word_q = []
+        while words:
+            word_p = words.pop(0)
+            for j in range(1):
+                for i in range(2):
+                    for w in word_q:
+                        exercise_words.append(w)
+                for k in range(j + 1):
+                    exercise_words.append(word_p)
+            word_q.append(word_p)
+        return exercise_words
 
     def get_word_list(self, file_name): # str -> list
         '''Opens a file and returns the contents'''
@@ -124,22 +178,6 @@ class TypingDrills:
         options = ['No', 'Yes']
         boolean_window = SelectionWindow(self.stdscr, static_message = question, selection_list = options)
         return boolean_window.get_selected_row()
-
-    def apply_speed_drill(self):
-        word_list = self.get_word_list('top100')
-        words = random.choices(word_list[:300], k=16)
-        exercise_words = []
-        word_q = []
-        while words:
-            word_p = words.pop(0)
-            for j in range(3):
-                for i in range(3):
-                    for w in word_q:
-                        exercise_words.append(w)
-                for k in range(j + 1):
-                    exercise_words.append(word_p)
-            word_q.append(word_p)
-        return exercise_words
 
     def randomize_word(self, word_list, word_amount):
         return random.choices(word_list, k=int(word_amount))

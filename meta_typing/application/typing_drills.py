@@ -5,10 +5,10 @@ import random
 
 class TypingDrills:
 
-    def __init__(self, stdscr):
+    def __init__(self, stdscr, word_drill = None):
         self.stdscr = stdscr
         self.exercise_menu= self.get_exercise_menu()
-        self.word_drill = self.start_up()
+        self.word_drill = word_drill
 
     def get_exercise_menu(self):
         '''Additional Exercises are named here with a below name_drill function'''
@@ -24,7 +24,7 @@ class TypingDrills:
         exercise_type = self.get_exercise_type()
         exercise_word_drill = self.get_exercise(exercise_type)
         customized_word_drill = self.ask_for_additional_paramters(exercise_word_drill)
-        return customized_word_drill
+        self.word_drill = customized_word_drill
 
     def get_exercise_type(self):
         '''selection window is created to get the exercise type from user'''
@@ -74,7 +74,7 @@ class TypingDrills:
             word_list = self.get_word_list('top300')
         elif word_bank_response == 'Top600':
             word_list = self.get_word_list('top600')
-        elif word_bank_response == 'Top10000':
+        elif word_bank_response == 'Top1000':
             word_list = self.get_word_list('top1000')
         elif word_bank_response == 'TenFastFingers':
             word_list = self.get_word_list('tenfastfingers')
@@ -107,6 +107,9 @@ class TypingDrills:
         return self.get_word_breakdown(word, int(amount))
 
     def get_word_breakdown(self, word, repeat_amount):
+        word = word.strip()
+        if len(word) < 2:
+            return ''
         word_list = []
         for char_amount in range(2, len(word) + 1):
             i = 0
@@ -115,10 +118,12 @@ class TypingDrills:
                 chunks = [chunk] * repeat_amount
                 word_list.extend(chunks)
                 i += 1
+        word_list.extend([word] * 3)
         return word_list
 
-    def word_accumulator(self):
-        word_list = self.get_word_list('top100')
+    def word_accumulator(self, word_list = None):
+        if not word_list:
+            word_list = self.get_word_list('top100')
         words = random.choices(word_list[:300], k=15)
         exercise_words = []
         word_q = []

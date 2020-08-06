@@ -59,8 +59,8 @@ class TypingApp:
     def _get_text_from_drills(self):
         '''gets the requirements from the user to select a drill'''
         typing_drill = TypingDrills(self.stdscr)
+        typing_drill.start_up()
         return typing_drill.get_word_drill()
-        pass
 
     def _get_text_from_url(self):
         '''gets the url from the user to request the text'''
@@ -368,28 +368,17 @@ class TypingApp:
         if slowest_words:
             response = self.ask_to_type_slowest_words()
             if response:
-                text = self.prepare_slowest_words_text(slowest_words)
+                for word in slowest_words:
+                    typing_drill = TypingDrills(self.stdscr)
+                    text = ' '.join(typing_drill.get_word_breakdown(word, 2))
+                    formatted_text = self._format_text(text)
+                    self.word_time_log = []
+                    self.type_text(formatted_text)
+                typing_drill = TypingDrills(self.stdscr)
+                text = ''.join(typing_drill.word_accumulator(slowest_words))
                 formatted_text = self._format_text(text)
                 self.word_time_log = []
                 self.type_text(formatted_text)
-                slowest_words = analyze_word_time_log(self.stdscr, self.word_time_log)
-
-    def prepare_slowest_words_text(self, slowest_words):
-        '''small drill to improve slowest words through repetition cycling'''
-        exercise = []
-        boundary = 1
-        while boundary < len(slowest_words):
-            exercise.append(slowest_words[boundary-1])
-            exercise.append(slowest_words[boundary-1])
-            exercise.append(slowest_words[boundary-1])
-            for i in range(boundary):
-                exercise.append(slowest_words[i])
-            for i in range(boundary):
-                exercise.append(slowest_words[i])
-            for i in range(boundary):
-                exercise.append(slowest_words[i])
-            boundary += 1
-        return ''.join(exercise)
         
     def ask_to_type_slowest_words(self):
         '''optional improvement typing window prompts'''

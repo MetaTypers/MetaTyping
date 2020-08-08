@@ -162,6 +162,7 @@ class TypingDrills:
     def get_additional_parameters(self, word_list):
         '''prompts user for additional paramters'''
         word_amount = self.get_word_amount() # an integer
+        word_list = self.get_capitals(word_list)
         randomize = self.randomization() # 0/1
         if randomize == 1:
             word_list = self.randomize_word(word_list, word_amount)
@@ -176,6 +177,15 @@ class TypingDrills:
         while not str(word_amount).isdigit():
             word_amount = TextWindow(self.stdscr, message = message).get_output()
         return word_amount
+
+    def get_capitals(self, word_list):
+        message = 'Do you want capitalization?'
+        options = ['No', 'Yes']
+        boolean_window = SelectionWindow(self.stdscr, static_message = message, selection_list = options)
+        response = boolean_window.get_selected_row()
+        if not response:
+            word_list = [word for word in word_list if all(char.islower() for char in word)]
+        return word_list
 
     def randomization(self):
         '''prompts user for if they want to randomize words'''

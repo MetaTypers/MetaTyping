@@ -1,7 +1,7 @@
 import curses
 from timeit import default_timer as timer
-from application.utilities import get_text_from_url, get_text_from_clipboard, format_text
-from application.utilities import SelectionWindow, analyze_word_time_log, TextWindow
+from application.utilities import format_text, analyze_word_time_log, fit_words_on_screen
+from application.windows import SelectionWindow, TextWindow, StaticWindow
 from application.typing_drills import TypingDrills
 from application.settings_app import apply_setting
 
@@ -30,11 +30,12 @@ class TypingApp:
     def start_up(self):
         '''combines all the typing application components that execute on start'''
         text = self.get_text()
+        if not text:
+            return
         formatted_text = self._format_text(text)
         self.get_typing_options()
         self.type_text(formatted_text)
-        slowest_words = analyze_word_time_log(self.stdscr, self.word_time_log)
-        self.type_slowest_words(slowest_words)
+        self.analyze_text()
         #self.write_char_log() Released for next patch
 
     def get_text(self):
@@ -42,17 +43,15 @@ class TypingApp:
         input_type = self.get_input_type()
         if input_type == 0: # 'drills':
             text = self._get_text_from_drills()
-        elif input_type == 1: # 'url':
-            text = self._get_text_from_url()
-        elif input_type == 2: # 'clipboard':
+        elif input_type == 1: # 'clipboard':
             text = self._get_text_from_clipboard()
-        else: # should there be a way to go back to menu?
-            pass
+        elif input_type == 2:
+            return None
         return text
 
     def get_input_type(self):
         '''creates a window for the user to select an input type'''
-        input_text_types = ['Typing Drills', 'Type from URL', 'Type from Clipboard']
+        input_text_types = ['Typing Drills', 'Type from Clipboard', 'Exit']
         input_text_types_window = SelectionWindow(self.stdscr, selection_list = input_text_types)
         selected_input_option = input_text_types_window.get_selected_row() # returns row value
         return selected_input_option
@@ -60,8 +59,8 @@ class TypingApp:
     def _get_text_from_drills(self):
         '''gets the requirements from the user to select a drill'''
         typing_drill = TypingDrills(self.stdscr)
+        typing_drill.start_up()
         return typing_drill.get_word_drill()
-        pass
 
     def _get_text_from_url(self):
         '''gets the url from the user to request the text'''
@@ -69,7 +68,9 @@ class TypingApp:
 
     def _get_text_from_clipboard(self):
         '''gets the clipboard from the user as input text'''
-        return get_text_from_clipboard(self.stdscr)
+        cb_message = 'Paste Clipboard and F4 when done: '
+        clipboard_window = TextWindow(self.stdscr, message = cb_message, termination_trigger = 'f4')
+        return clipboard_window.get_output()
 
     def _format_text(self, raw_text):
         '''proccess the text and fits the text to the screen'''
@@ -355,33 +356,29 @@ class TypingApp:
             elif navigation_code == 'exit':
                 return
 
+    def analyze_text(self):
+        word_stats_feedback, slowest_words = analyze_word_time_log(self.stdscr, self.word_time_log)
+        max_line_height, max_line_width = self.stdscr.getmaxyx()
+        screens = fit_words_on_screen(word_stats_feedback, max_line_height, max_line_width)
+        StaticWindow(self.stdscr, screens = screens)
+        self.type_slowest_words(slowest_words)
+
     def type_slowest_words(self, slowest_words):
         '''allows user the option to improve on there slowest words'''
         if slowest_words:
             response = self.ask_to_type_slowest_words()
             if response:
-                text = self.prepare_slowest_words_text(slowest_words)
+                for word in slowest_words:
+                    typing_drill = TypingDrills(self.stdscr)
+                    text = ' '.join(typing_drill.get_word_breakdown(word, 2))
+                    formatted_text = self._format_text(text)
+                    self.word_time_log = []
+                    self.type_text(formatted_text)
+                typing_drill = TypingDrills(self.stdscr)
+                text = ''.join(typing_drill.word_accumulator(slowest_words))
                 formatted_text = self._format_text(text)
                 self.word_time_log = []
                 self.type_text(formatted_text)
-                slowest_words = analyze_word_time_log(self.stdscr, self.word_time_log)
-
-    def prepare_slowest_words_text(self, slowest_words):
-        '''small drill to improve slowest words through repetition cycling'''
-        exercise = []
-        boundary = 1
-        while boundary < len(slowest_words):
-            exercise.append(slowest_words[boundary-1])
-            exercise.append(slowest_words[boundary-1])
-            exercise.append(slowest_words[boundary-1])
-            for i in range(boundary):
-                exercise.append(slowest_words[i])
-            for i in range(boundary):
-                exercise.append(slowest_words[i])
-            for i in range(boundary):
-                exercise.append(slowest_words[i])
-            boundary += 1
-        return ''.join(exercise)
         
     def ask_to_type_slowest_words(self):
         '''optional improvement typing window prompts'''

@@ -1,10 +1,11 @@
 import curses
-from application.utilities import SelectionWindow
+from application.windows import SelectionWindow
 import json
 
 
 class SettingsApp:
-    '''TODO'''
+    '''Allows users to change their background, text, and wpm display color'''
+
     def __init__(self, stdscr):
         self.stdscr = stdscr
         self.color_options = self.get_color_options()
@@ -15,19 +16,22 @@ class SettingsApp:
         return ['BLACK', 'BLUE', 'CYAN', 'GREEN','MAGENTA', 'RED', 'WHITE', 'YELLOW']
 
     def start_up(self):
-        text_option = self.change_text_type()
-        color_option = self.change_color()
-        self.apply_color_change(text_option, color_option)
+        while True:
+            text_option = self.change_text_type()
+            if text_option == 'Exit':
+                return
+            color_option = self.change_color(text_option)
+            self.apply_color_change(text_option, color_option)
 
     def change_text_type(self):
         question = 'Change text color'
-        text_types = ['Background', 'Main', 'Secondary']
+        text_types = ['Background', 'Main', 'Secondary', 'Exit']
         text_types_window = SelectionWindow(self.stdscr, static_message = question, selection_list = text_types)
         selected_type = text_types_window.get_selected_response()
         return selected_type
 
-    def change_color(self):
-        question = 'Change background color'
+    def change_color(self, option):
+        question = f'Change {option} color'
         color_window = SelectionWindow(self.stdscr, static_message = question, selection_list = self.color_options )
         selected_color = color_window.get_selected_response()
         return selected_color
@@ -39,11 +43,6 @@ class SettingsApp:
         write_color_settings(updated_colors)
 
     def update_color_change(self, color_settings, selected_type, selected_color):
-        # for idx in range(len(color_settings)):
-        #     color_type = str(*color_settings[idx].keys())
-        # for color_type, color in color_settings.items():
-        #     if color_type == selected_type:
-        #         color_settings[color_type] = selected_color
         color_settings[0][selected_type] = selected_color
         return color_settings
 

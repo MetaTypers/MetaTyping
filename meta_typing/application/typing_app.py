@@ -4,6 +4,7 @@ from application.utilities import format_text, analyze_word_time_log, fit_words_
 from application.windows import SelectionWindow, TextWindow, StaticWindow
 from application.typing_drills import TypingDrills
 from application.settings_app import apply_setting
+from application.etl import etl
 
 
 class TypingApp:
@@ -35,8 +36,11 @@ class TypingApp:
         formatted_text = self._format_text(text)
         self.get_typing_options()
         self.type_text(formatted_text)
+        if not self.word_time_log:
+            return
         self.analyze_text()
-        #self.write_char_log() Released for next patch
+        self.write_char_log()
+        etl()
 
     def get_text(self):
         '''user selects an input method that executes to get text from'''

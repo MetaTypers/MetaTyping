@@ -1,6 +1,11 @@
 __pycache__/
 *.pyc
+*.db
+words.db
+words.db.wal
+word_stats.pkl
 venv/
+.vscode
 *.save
 char_log.txt
 # Distribution / packaging

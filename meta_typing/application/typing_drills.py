@@ -201,4 +201,6 @@ class TypingDrills:
         return word_list[:int(word_amount)]
 
     def get_word_drill(self):
+        if self.word_drill[-1][-1] != ' ':
+           self.word_drill[-1] += ' ' 
         return ' '.join(self.word_drill)

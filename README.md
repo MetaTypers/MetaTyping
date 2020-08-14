@@ -2,7 +2,7 @@
 MetaTyping is a typing application that helps users improve their typing ability by using typing drills, typing techniques, and feedback metrics.
 
 #### What do you type?
-- Text is generated using built-in drills, word lists, and clipboards that preserve indentation for code, books, etc
+- Text is generated using built-in drills, word lists, word recommendations based on stats and clipboards
 
 #### What are typing drills?
 - Most common words: top 100, 300, 600, 1000 most common words
@@ -21,6 +21,19 @@ MetaTyping is a typing application that helps users improve their typing ability
 #### What feedback metrics are shown?
 - An approximate words per minute (wpm) is shown after each word typed
 - Summary statistics like wpm, accuracy, slowest words and more after each session
+
+#### How are words recommended?
+- Each word typed gets stored into a database recording:
+  -  word speed
+  -  word speed with space
+  -  accuracy
+  -  if it had a capitalization
+  -  if it was surrounded by a symbol
+- Words can be recommended based on worst:
+  - wpm
+  - wpm with space
+  - accuracy
+  - relative speed ordering that top typists have
 
 ### Installation Guide/ How to use
 

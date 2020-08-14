@@ -25,7 +25,7 @@ class SettingsApp:
 
     def change_text_type(self):
         question = 'Change text color'
-        text_types = ['Background', 'Main', 'Secondary', 'Exit']
+        text_types = ['Background', 'Main', 'Secondary', 'Menu','Exit']
         text_types_window = SelectionWindow(self.stdscr, static_message = question, selection_list = text_types)
         selected_type = text_types_window.get_selected_response()
         return selected_type
@@ -65,9 +65,10 @@ def apply_color_settings(color_settings):
     background_color = f"COLOR_{color_settings[0]['Background']}"
     main_color = f"COLOR_{color_settings[0]['Main']}"
     secondary_color = f"COLOR_{color_settings[0]['Secondary']}"
-    
+    menu_color = f"COLOR_{color_settings[0]['Menu']}"
+
     modpart = 'curses'
     module = __import__(modpart)
     curses.init_pair(1, getattr(module, main_color), getattr(module, background_color))
     curses.init_pair(2, getattr(module, secondary_color), getattr(module, background_color))
-    curses.init_pair(3, curses.COLOR_WHITE, getattr(module, background_color))
+    curses.init_pair(3, getattr(module, menu_color), getattr(module, background_color))

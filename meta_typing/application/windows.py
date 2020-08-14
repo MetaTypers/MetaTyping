@@ -230,9 +230,10 @@ def apply_color_settings(color_settings):
     background_color = f"COLOR_{color_settings[0]['Background']}"
     main_color = f"COLOR_{color_settings[0]['Main']}"
     secondary_color = f"COLOR_{color_settings[0]['Secondary']}"
+    menu_color = f"COLOR_{color_settings[0]['Menu']}"
     
     modpart = 'curses'
     module = __import__(modpart)
     curses.init_pair(1, getattr(module, main_color), getattr(module, background_color))
     curses.init_pair(2, getattr(module, secondary_color), getattr(module, background_color))
-    curses.init_pair(3, curses.COLOR_WHITE, getattr(module, background_color))
+    curses.init_pair(3, getattr(module, menu_color), getattr(module, background_color))

@@ -4,14 +4,16 @@ from application.utilities import format_text, analyze_word_time_log, fit_words_
 from application.windows import SelectionWindow, TextWindow, StaticWindow
 from application.typing_drills import TypingDrills
 from application.settings_app import apply_setting
+from application.etl import etl
 
 
 class TypingApp:
     '''This class contains a pipline for running the Typing application
     using utilities, windows and typing drills.
     '''
-    def __init__(self, stdscr):
+    def __init__(self, stdscr, text = None):
         self.stdscr = stdscr
+        self.text = text
         self.setup()
         self.char_time_log = []
         self.word_time_log = []
@@ -35,11 +37,17 @@ class TypingApp:
         formatted_text = self._format_text(text)
         self.get_typing_options()
         self.type_text(formatted_text)
+        if not self.word_time_log:
+            return
         self.analyze_text()
-        #self.write_char_log() Released for next patch
+        self.write_char_log()
+        etl()
 
     def get_text(self):
         '''user selects an input method that executes to get text from'''
+        if self.text:
+            return self.text
+
         input_type = self.get_input_type()
         if input_type == 0: # 'drills':
             text = self._get_text_from_drills()

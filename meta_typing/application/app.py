@@ -1,6 +1,7 @@
 import curses
 import sys
 from application.typing_app import TypingApp
+from application.statistics_app import StatisticsApp
 from application.settings_app import SettingsApp
 from application.windows import SelectionWindow
 
@@ -18,13 +19,15 @@ class App():
             self.start_menu_action(start_menu_choice)
 
     def get_start_menu_choice(self):
-        start_menu = ['Typing', 'Settings', 'Exit']
+        start_menu = ['Typing', 'Statistics', 'Settings', 'Exit']
         start_menu_window = SelectionWindow(self.stdscr, selection_list = start_menu)
         return start_menu_window.get_selected_response()
 
     def start_menu_action(self, response):
         if response == 'Typing':
             TypingApp(self.stdscr)
+        if response == 'Statistics':
+            StatisticsApp(self.stdscr)
         elif response == 'Settings':
             SettingsApp(self.stdscr)
         elif response == 'Exit':

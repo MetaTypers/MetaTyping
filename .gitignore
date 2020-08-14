@@ -4,6 +4,7 @@ __pycache__/
 words.db
 words.db.wal
 word_stats.pkl
+char_log.txt
 venv/
 .vscode
 *.save

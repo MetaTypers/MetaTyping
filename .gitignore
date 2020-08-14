@@ -7,7 +7,6 @@ word_stats.pkl
 venv/
 .vscode
 *.save
-char_log.txt
 # Distribution / packaging
 .Python
 env/

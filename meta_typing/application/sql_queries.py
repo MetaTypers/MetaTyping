@@ -46,15 +46,19 @@ def bulk_insert_word_stats():
     con.close()
 
 # QUERY SEARCHES
-def slowest_word_by_list(con, word_list):
-    # WHERE word_list == {word_list} ORDER BY wpm
-    con.execute(f"SELECT word, count(word) AS ct FROM word_stats GROUP BY word ORDER BY ct")
-    word_list = con.fetchall()
-    print(word_list)
 
-def pandas_view(con):
-    df = con.execute("SELECT word, count(word) AS ct FROM word_stats GROUP BY word ORDER BY ct").fetchdf()
-    print(df)
+def query_word_recommendation(query):
+    list_type, metric, amount = query = query
+    con = connect_db()
+    df = con.execute(f'''
+    SELECT word, AVG({metric}::DOUBLE) as metric
+    from word_stats
+    WHERE word_list = {list_type} AND capital = 'false' AND symbols = 'false'
+    GROUP BY word ORDER BY metric 
+    LIMIT {amount}
+    ''').fetchdf()
+    con.close()
+    return df['word'].tolist()
 
 def query_count(con):
     con.execute("SELECT COUNT(*) FROM word_stats")
@@ -65,9 +69,7 @@ def main():
     con = connect_db_from_script()
     #drop_word_stats(con)
     # create_word_stats(con)
-    #con.execute("SELECT * FROM word_stats")
-    # slowest_word_by_list(con, 1)
-    pandas_view(con)
+    query_count(con)
     con.close()
 
 if __name__ == "__main__":

@@ -11,8 +11,9 @@ class TypingApp:
     '''This class contains a pipline for running the Typing application
     using utilities, windows and typing drills.
     '''
-    def __init__(self, stdscr):
+    def __init__(self, stdscr, text = None):
         self.stdscr = stdscr
+        self.text = text
         self.setup()
         self.char_time_log = []
         self.word_time_log = []
@@ -44,6 +45,9 @@ class TypingApp:
 
     def get_text(self):
         '''user selects an input method that executes to get text from'''
+        if self.text:
+            return self.text
+
         input_type = self.get_input_type()
         if input_type == 0: # 'drills':
             text = self._get_text_from_drills()

@@ -1,8 +1,8 @@
 # What is MetaTyping?
-MetaTyping is a typing application that helps users improve their typing ability by using typing drills, typing techniques, and feedback metrics.
+MetaTyping is a typing application that helps users improve their typing ability by using specialized drills, techniques, and feedback metrics.
 
 #### What do you type?
-- Text is generated using built-in drills, word lists, word recommendations based on stats and clipboards
+- Text is generated using built-in drills, word lists, clipboards and word recommendations based on user-stats
 
 #### What are typing drills?
 - Most common words: top 100, 300, 600, 1000 most common words
@@ -25,10 +25,11 @@ MetaTyping is a typing application that helps users improve their typing ability
 #### How are words recommended?
 - Each word typed gets stored into a database recording:
   -  word speed
-  -  word speed with space
+  -  word speed with space (before and after)
   -  accuracy
   -  if it had a capitalization
   -  if it was surrounded by a symbol
+  
 - Words can be recommended based on worst:
   - wpm
   - wpm with space
@@ -37,7 +38,7 @@ MetaTyping is a typing application that helps users improve their typing ability
 
 ### Installation Guide/ How to use
 
-Must have python 3.0 +
+Must have python 3.7 +
 
 #### For Mac and Linux using terminal
 
@@ -60,7 +61,7 @@ pip install -r requirements.txt
 cd meta_typing
 py main.py
 ```
-### How To Use
+### How To Use Typing App
 
 - start application in `/MetaTyping/meta_typing` using `python3 main.py` or `py main.py` if you are on Windows
 - navigate with with arrow keys and select with enter
@@ -73,3 +74,16 @@ py main.py
     - Previous screen with 'Left Arrow'
     - Next screen with 'Right Arrow'
 
+### How To Use Dashboard
+
+- start dashboard in `/MetaTyping/meta_typing` using `python3 dashboard.py` or `py dashboard.py` if you are on Windows
+- you can filter the dashboard by:
+  - grouping words by frequency to see wpm average over time
+    - top 100, 300, 600, 1000, 3000, 10000, or all
+  - type an individual word in a so see wpm over time
+  - query the dashboard and see average of all time with bar plots
+    - can navigate next page at the bottom
+    - can sort words by using arrows near metrics(wpm, wpm_space, accuracy)
+    - can type letters in the word filter to filter letter combinations (you may want to search in all words)
+    - can use `< 80` under accuracy metric to filter words with accuracy less than 80%
+- can exit by `ctrl c` in the terminal

@@ -3,6 +3,7 @@ from application.windows import SelectionWindow, TextWindow, StaticWindow
 from application.settings_app import apply_setting
 from application.sql_queries import query_word_recommendation
 from application.typing_app import TypingApp
+from application.utilities import fit_words_on_screen
 import pickle
 
 class StatisticsApp:
@@ -24,7 +25,7 @@ class StatisticsApp:
         if selected_response == 'Type Words':
             self.type_words_menu()
         elif selected_response == 'Visualize Statistics':
-            pass
+            self.prompt_visualize_statistics_text()
         elif selected_response == 'Exit':
             return
 
@@ -94,3 +95,9 @@ class StatisticsApp:
         indexes = [idx - list_b_no_missing.index(a) for idx, a in enumerate(list_a, start = 0)]
         list_a_sorted_by_index = [a for _, a in sorted(zip(indexes, list_a), reverse = True)]
         return list_a_sorted_by_index
+
+    def prompt_visualize_statistics_text(self):
+        text = 'To visualize your statistics, run "python3 dashboard.py" in /MetaTyping/meta_typing directory'
+        max_line_height, max_line_width = self.stdscr.getmaxyx()
+        screens = fit_words_on_screen(text, max_line_height, max_line_width)
+        StaticWindow(self.stdscr, screens = screens)

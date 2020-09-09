@@ -4,5 +4,4 @@
   - tests
   - CI/CD tools (travis or azure?)
   - Docker setup
-  - user database for storing typing stats
   

@@ -61,9 +61,31 @@ def query_word_recommendation(query):
     return df['word'].tolist()
 
 def query_count(con):
-    con.execute("SELECT COUNT(*) FROM word_stats")
+    con.execute("SELECT count(*) FROM word_stats")
     print(con.fetchall())
 
+def query_word_by_date(con, word):
+    df = con.execute(f"""
+    SELECT avg(wpm), date
+    from word_stats
+    where word = '{word}'
+    group by date
+    ORDER BY date
+    """).fetchdf()
+    print(df)
+    con.close()
+
+def query_word_list_by_date(con, list_type):
+    df = con.execute(f'''
+    SELECT avg(wpm), date
+    from word_stats
+    where word_list = {list_type}
+    group by date
+    ORDER BY date
+    ''').fetchdf()
+    print(df)
+    con.close()
+    
 # testing scripts
 def main():
     con = connect_db_from_script()

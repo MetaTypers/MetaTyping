@@ -61,7 +61,7 @@ def date_format():
     d = datetime.now(timezone.utc)
     return f'{d.year}-{d.month}-{d.day}'
 
-def process_log(word, time, time_with_space, accuracy, space_amount, word_dictionary):
+def process_log(word, time, time_with_space, space_amount, accuracy, word_dictionary):
     '''only adds a clean word if it is in the 10,000 word dictionary'''
     return _process_log(word, time, time_with_space, space_amount, accuracy, word_dictionary) if valid_word(word, word_dictionary) else None
 

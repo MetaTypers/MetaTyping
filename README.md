@@ -67,7 +67,7 @@ py main.py
 - navigate with with arrow keys and select with enter
 - Exit with `esc`
 - Force close `ctrl c`
-- Skip characters with ` (the key left of 1)
+- Skip characters with `_`
 - Navigate text:
     - Previous line with 'Up Arrow'
     - Next line with 'Down Arrow'

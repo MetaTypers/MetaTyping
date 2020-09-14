@@ -160,7 +160,7 @@ class TypingApp:
             start_time = timer()
             letters += letter
             good_accuracy_word.append(good_accuracy)
-            if char == '`': # an autoskip for not typable char
+            if char == '_': # an autoskip for not typable char
                 char = letter
             else:
                 if not first_word_skip:
@@ -210,7 +210,7 @@ class TypingApp:
                 break_after_n_counter = 1
             if idx == 0:
                 start_time = timer()
-            while char != letter and char != '`':
+            while char != letter and char != '_':
                 if char == curses.KEY_DOWN:
                     return 'next line'
                 if char == curses.KEY_UP:
@@ -269,7 +269,7 @@ class TypingApp:
                 char_len = 1
                 start_word = timer()
                 start_time = timer()
-            while char != letter and char != '`':
+            while char != letter and char != '_':
                 if char == curses.KEY_DOWN:
                     return 'next line'
                 if char == curses.KEY_UP:

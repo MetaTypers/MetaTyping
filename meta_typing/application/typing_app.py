@@ -133,7 +133,7 @@ class TypingApp:
                 start_word = timer()
             start_time = timer()
             char = self.stdscr.get_wch()
-            while char != letter and char != '`':
+            while char != letter and char != '_':
 
                 if self.x + blank_spots < len(line):
                     temp_str = line[idx:idx+blank_spots]
@@ -228,7 +228,7 @@ class TypingApp:
             start_time = timer()
             letters += letter
             good_accuracy_word.append(good_accuracy)
-            if char == '`': # an autoskip for not typable char
+            if char == '_': # an autoskip for not typable char
                 char = letter
             else:
                 if not first_word_skip:
@@ -287,7 +287,7 @@ class TypingApp:
             start_time = timer()
             letters += letter
             good_accuracy_word.append(good_accuracy)
-            if char == '`': # an autoskip for not typable char
+            if char == '_': # an autoskip for not typable char
                 char = letter
             else:
                 if not first_word_skip:

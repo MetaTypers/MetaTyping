@@ -81,7 +81,7 @@ class TypingDrills:
         return word_list
 
     def speed_drills(self):
-        speed_drill_menu = ['Word Breakdown', 'Word Accumulator']
+        speed_drill_menu = ['Word Breakdown', 'Word Accumulator', 'Words By Length']
         speed_drill_window = SelectionWindow(self.stdscr, selection_list = speed_drill_menu)
         speed_drill_response = speed_drill_window.get_selected_response()
         return speed_drill_response
@@ -91,6 +91,8 @@ class TypingDrills:
             word_list = self.word_breakdown()
         elif speed_drill_response == 'Word Accumulator':
             word_list = self.word_accumulator()
+        elif speed_drill_response == 'Words By Length':
+            word_list = self.word_by_length()
         return word_list
 
     def word_breakdown(self):
@@ -137,6 +139,17 @@ class TypingDrills:
                     exercise_words.append(word_p)
             word_q.append(word_p)
         return exercise_words
+
+    def word_by_length(self):
+        message = 'Enter the length of words to type: '
+        length = TextWindow(self.stdscr, message = message).get_output()
+        while not str(length).isdigit() and 0 < length < 16:
+            length = TextWindow(self.stdscr, message = message).get_output()
+        return self.get_word_by_length(int(length))
+
+    def get_word_by_length(self, length):
+        words = self.get_word_list('tenfastfingers')
+        return [word for word in words if len(word) == length]
 
     def get_word_list(self, file_name): # str -> list
         '''Opens a file and returns the contents'''
@@ -198,7 +211,10 @@ class TypingDrills:
         return random.choices(word_list, k=int(word_amount))
 
     def apply_word_amount(self, word_list, word_amount):
-        return word_list[:int(word_amount)]
+        if int(word_amount) < len(word_list):
+            return word_list[:int(word_amount)]
+        else:
+            return word_list[:int(word_amount)] + random.choices(word_list, k=(int(word_amount) - len(word_list)))
 
     def get_word_drill(self):
         if self.word_drill[-1][-1] != ' ':

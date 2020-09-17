@@ -148,7 +148,7 @@ class TypingDrills:
         return self.get_word_by_length(int(length))
 
     def get_word_by_length(self, length):
-        words = self.get_word_list('tenfastfingers')
+        words = self.get_word_list('training_words')
         return [word for word in words if len(word) == length]
 
     def get_word_list(self, file_name): # str -> list

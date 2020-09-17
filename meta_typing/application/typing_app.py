@@ -221,6 +221,8 @@ class TypingApp:
                     return 'prev page'
                 if char == '\x1b':
                     return 'exit'
+                self.stdscr.addstr(self.y, self.x , letter, curses.color_pair(3))
+                self.stdscr.move(self.y, self.x)
                 char = self.stdscr.get_wch()
                 good_accuracy = False
             end_time = timer()
@@ -280,6 +282,8 @@ class TypingApp:
                     return 'prev page'
                 if char == '\x1b':
                     return 'exit'
+                self.stdscr.addstr(self.y, self.x , letter, curses.color_pair(3))
+                self.stdscr.move(self.y, self.x)
                 char = self.stdscr.get_wch()
                 good_accuracy = False
             end_time = timer()
@@ -293,14 +297,15 @@ class TypingApp:
                 if not first_word_skip:
                     self.char_time_log.append((char, delta, good_accuracy, unit_type))
             if char == ' ' or idx == len(line) - 1:
-                first_word_skip = False
                 end_word = timer()
                 delta_word = end_word - start_word
                 wpm = str(round((60 / (delta_word / char_len))/5))
-                if char_len > 2:
-                    self.stdscr.addstr(self.y+1, self.x-char_len + 1, wpm, curses.color_pair(2))
+                if not first_word_skip:
+                    if char_len > 2:
+                        self.stdscr.addstr(self.y+1, self.x-char_len + 1, wpm, curses.color_pair(2))
+                    self.word_time_log.append((letters, wpm, all(good_accuracy_word)))
+                first_word_skip = False
                 char_len = 1
-                self.word_time_log.append((letters, wpm, all(good_accuracy_word)))
                 letters = ''
                 good_accuracy_word = []
                 start_word = timer()

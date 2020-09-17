@@ -27,3 +27,4 @@ six==1.15.0
 soupsieve==2.0.1
 urllib3==1.25.10
 Werkzeug==1.0.1
+windows-curses==2.1.0;sys_platform=="win32"

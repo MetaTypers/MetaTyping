@@ -3,6 +3,7 @@ from timeit import default_timer as timer
 from application.utilities import format_text, analyze_word_time_log, fit_words_on_screen
 from application.windows import SelectionWindow, TextWindow, StaticWindow
 from application.typing_drills import TypingDrills
+from application.typing_literature import TypingLiterature
 from application.settings_app import apply_setting
 from application.etl import etl
 
@@ -49,19 +50,21 @@ class TypingApp:
             return self.text
 
         input_type = self.get_input_type()
-        if input_type == 0: # 'drills':
+        if input_type == 'Typing Drills':
             text = self._get_text_from_drills()
-        elif input_type == 1: # 'clipboard':
+        elif input_type == 'Type from Clipboard':
             text = self._get_text_from_clipboard()
-        elif input_type == 2:
+        elif input_type == 'Type from Literature':
+            text = self._get_text_from_literature()
+        elif input_type == 'Exit':
             return None
         return text
 
     def get_input_type(self):
         '''creates a window for the user to select an input type'''
-        input_text_types = ['Typing Drills', 'Type from Clipboard', 'Exit']
+        input_text_types = ['Typing Drills', 'Type from Clipboard', 'Type from Literature', 'Exit']
         input_text_types_window = SelectionWindow(self.stdscr, selection_list = input_text_types)
-        selected_input_option = input_text_types_window.get_selected_row() # returns row value
+        selected_input_option = input_text_types_window.get_selected_response()
         return selected_input_option
 
     def _get_text_from_drills(self):
@@ -70,15 +73,16 @@ class TypingApp:
         typing_drill.start_up()
         return typing_drill.get_word_drill()
 
-    def _get_text_from_url(self):
-        '''gets the url from the user to request the text'''
-        return get_text_from_url(self.stdscr)
-
     def _get_text_from_clipboard(self):
         '''gets the clipboard from the user as input text'''
         cb_message = 'Paste Clipboard and F4 when done: '
         clipboard_window = TextWindow(self.stdscr, message = cb_message, termination_trigger = 'f4')
         return clipboard_window.get_output()
+
+    def _get_text_from_literature(self):
+        typing_literature = TypingLiterature(self.stdscr)
+        text = typing_literature.start_up()
+        return text
 
     def _format_text(self, raw_text):
         '''proccess the text and fits the text to the screen'''

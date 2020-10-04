@@ -36,6 +36,10 @@ MetaTyping is a typing application that helps users improve their typing ability
   - accuracy
   - relative speed ordering that top typists have
 
+#### Dashboard Example
+
+[![https://i9.ytimg.com/vi/xkQGY93j1jU/mq3.jpg?sqp=CLzr5vsF&rs=AOn4CLD--ArBHu4V65mLV-Gx0iP5B1gYWg](http://img.youtube.com/vi/xkQGY93j1jU/0.jpg)](https://www.youtube.com/watch?v=xkQGY93j1jU&ab_channel=MetaTypers "MetaTyping Dashboard")
+
 ### Installation Guide/ How to use
 
 Must have python 3.7 +
@@ -67,7 +71,7 @@ py main.py
 - navigate with with arrow keys and select with enter
 - Exit with `esc`
 - Force close `ctrl c`
-- Skip characters with ` (the key left of 1)
+- Skip characters with `_`
 - Navigate text:
     - Previous line with 'Up Arrow'
     - Next line with 'Down Arrow'

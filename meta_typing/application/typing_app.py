@@ -3,6 +3,7 @@ from timeit import default_timer as timer
 from application.utilities import format_text, analyze_word_time_log, fit_words_on_screen
 from application.windows import SelectionWindow, TextWindow, StaticWindow
 from application.typing_drills import TypingDrills
+from application.typing_literature import TypingLiterature
 from application.settings_app import apply_setting
 from application.etl import etl
 
@@ -49,19 +50,21 @@ class TypingApp:
             return self.text
 
         input_type = self.get_input_type()
-        if input_type == 0: # 'drills':
+        if input_type == 'Typing Drills':
             text = self._get_text_from_drills()
-        elif input_type == 1: # 'clipboard':
+        elif input_type == 'Type from Clipboard':
             text = self._get_text_from_clipboard()
-        elif input_type == 2:
+        elif input_type == 'Type from Literature':
+            text = self._get_text_from_literature()
+        elif input_type == 'Exit':
             return None
         return text
 
     def get_input_type(self):
         '''creates a window for the user to select an input type'''
-        input_text_types = ['Typing Drills', 'Type from Clipboard', 'Exit']
+        input_text_types = ['Typing Drills', 'Type from Clipboard', 'Type from Literature', 'Exit']
         input_text_types_window = SelectionWindow(self.stdscr, selection_list = input_text_types)
-        selected_input_option = input_text_types_window.get_selected_row() # returns row value
+        selected_input_option = input_text_types_window.get_selected_response()
         return selected_input_option
 
     def _get_text_from_drills(self):
@@ -70,15 +73,16 @@ class TypingApp:
         typing_drill.start_up()
         return typing_drill.get_word_drill()
 
-    def _get_text_from_url(self):
-        '''gets the url from the user to request the text'''
-        return get_text_from_url(self.stdscr)
-
     def _get_text_from_clipboard(self):
         '''gets the clipboard from the user as input text'''
         cb_message = 'Paste Clipboard and F4 when done: '
         clipboard_window = TextWindow(self.stdscr, message = cb_message, termination_trigger = 'f4')
         return clipboard_window.get_output()
+
+    def _get_text_from_literature(self):
+        typing_literature = TypingLiterature(self.stdscr)
+        text = typing_literature()
+        return text
 
     def _format_text(self, raw_text):
         '''proccess the text and fits the text to the screen'''
@@ -133,7 +137,7 @@ class TypingApp:
                 start_word = timer()
             start_time = timer()
             char = self.stdscr.get_wch()
-            while char != letter and char != '`':
+            while char != letter and char != '_':
 
                 if self.x + blank_spots < len(line):
                     temp_str = line[idx:idx+blank_spots]
@@ -160,7 +164,7 @@ class TypingApp:
             start_time = timer()
             letters += letter
             good_accuracy_word.append(good_accuracy)
-            if char == '`': # an autoskip for not typable char
+            if char == '_': # an autoskip for not typable char
                 char = letter
             else:
                 if not first_word_skip:
@@ -210,7 +214,7 @@ class TypingApp:
                 break_after_n_counter = 1
             if idx == 0:
                 start_time = timer()
-            while char != letter and char != '`':
+            while char != letter and char != '_':
                 if char == curses.KEY_DOWN:
                     return 'next line'
                 if char == curses.KEY_UP:
@@ -221,6 +225,8 @@ class TypingApp:
                     return 'prev page'
                 if char == '\x1b':
                     return 'exit'
+                self.stdscr.addstr(self.y, self.x , letter, curses.color_pair(3))
+                self.stdscr.move(self.y, self.x)
                 char = self.stdscr.get_wch()
                 good_accuracy = False
             end_time = timer()
@@ -228,7 +234,7 @@ class TypingApp:
             start_time = timer()
             letters += letter
             good_accuracy_word.append(good_accuracy)
-            if char == '`': # an autoskip for not typable char
+            if char == '_': # an autoskip for not typable char
                 char = letter
             else:
                 if not first_word_skip:
@@ -269,7 +275,7 @@ class TypingApp:
                 char_len = 1
                 start_word = timer()
                 start_time = timer()
-            while char != letter and char != '`':
+            while char != letter and char != '_':
                 if char == curses.KEY_DOWN:
                     return 'next line'
                 if char == curses.KEY_UP:
@@ -280,6 +286,8 @@ class TypingApp:
                     return 'prev page'
                 if char == '\x1b':
                     return 'exit'
+                self.stdscr.addstr(self.y, self.x , letter, curses.color_pair(3))
+                self.stdscr.move(self.y, self.x)
                 char = self.stdscr.get_wch()
                 good_accuracy = False
             end_time = timer()
@@ -287,20 +295,21 @@ class TypingApp:
             start_time = timer()
             letters += letter
             good_accuracy_word.append(good_accuracy)
-            if char == '`': # an autoskip for not typable char
+            if char == '_': # an autoskip for not typable char
                 char = letter
             else:
                 if not first_word_skip:
                     self.char_time_log.append((char, delta, good_accuracy, unit_type))
             if char == ' ' or idx == len(line) - 1:
-                first_word_skip = False
                 end_word = timer()
                 delta_word = end_word - start_word
                 wpm = str(round((60 / (delta_word / char_len))/5))
-                if char_len > 2:
-                    self.stdscr.addstr(self.y+1, self.x-char_len + 1, wpm, curses.color_pair(2))
+                if not first_word_skip:
+                    if char_len > 2:
+                        self.stdscr.addstr(self.y+1, self.x-char_len + 1, wpm, curses.color_pair(2))
+                    self.word_time_log.append((letters, wpm, all(good_accuracy_word)))
+                first_word_skip = False
                 char_len = 1
-                self.word_time_log.append((letters, wpm, all(good_accuracy_word)))
                 letters = ''
                 good_accuracy_word = []
                 start_word = timer()

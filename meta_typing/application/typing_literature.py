@@ -59,7 +59,7 @@ class TypingLiterature:
             title_message = 'First, Enter the Title of the Literature and F4 when done: '
             title_window = TextWindow(self.stdscr, message = title_message, termination_trigger = 'f4')
             file_name = title_window.get_output()
-            if file_name:
+            if len(file_name) > 1 and len(file_name) < 35:
                 break
         
         while True:

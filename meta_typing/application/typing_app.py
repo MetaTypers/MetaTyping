@@ -81,7 +81,7 @@ class TypingApp:
 
     def _get_text_from_literature(self):
         typing_literature = TypingLiterature(self.stdscr)
-        text = typing_literature.start_up()
+        text = typing_literature()
         return text
 
     def _format_text(self, raw_text):

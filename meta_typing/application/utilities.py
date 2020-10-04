@@ -15,7 +15,12 @@ def filter_text(text): # str -> str
         '’': "'",
         '“': '"',
         '”': '"',
-        '—':'-',
+        '—': '-',
+        '–': '-',
+        '―': '-',
+        '…': '...',
+        '「': '(',
+        '」': ')',
     }
 
     # can do a perf test to see if one full iteration with multiple checks is better

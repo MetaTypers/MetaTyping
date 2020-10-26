@@ -90,31 +90,41 @@ class TypingApp:
         return format_text(raw_text, max_line_height // 2, max_line_width)
 
     def get_typing_options(self):
-        self.type_ahead()
-        if not self.type_ahead_amount:
-            self.unit_type()
+        '''the typing display will changed based on the typing method'''
+        self.typing_method = self._get_typing_options()
+        if self.typing_method == 'Typing Ahead':
+            self.type_ahead_amount = self.get_type_ahead_amount()
+        if self.typing_method == 'Hot Strings Type':
+            self.hot_strings_mapping = self.get_hot_strings_mapping()
 
-    def type_ahead(self):
-        question = 'Would you like to practice reading ahead and typing?'
-        options = ['No', 'Yes']
-        boolean_window =  SelectionWindow(self.stdscr, static_message = question, selection_list = options)
-        self.type_ahead_amount = boolean_window.get_selected_row()
-        if self.type_ahead_amount == 1:
-            self.get_type_ahead_amount()
+    def _get_typing_options(self):
+        '''creates a window for the user to select typing method'''
+        prompt = 'What typing style would you like to practice?'
+        typing_options = ['Normal', 'Typing Ahead', 'Unit Type', 'Hot Strings Type']
+        input_text_types_window = SelectionWindow(self.stdscr, static_message = prompt, selection_list = typing_options)
+        selected_typing_option = input_text_types_window.get_selected_response()
+        return selected_typing_option
 
     def get_type_ahead_amount(self):
         '''prompts user for an integer for blank amount'''
         message = 'Enter the amount of spaces you would like to type ahead: '
-        blank_amount = TextWindow(self.stdscr, message = message).get_output()
-        while not str(blank_amount).isdigit():
-            blank_amount = TextWindow(self.stdscr, message = message).get_output()
-        self.type_ahead_amount = int(blank_amount)
+        type_ahead_amount = TextWindow(self.stdscr, message = message).get_output()
+        while not str(type_ahead_amount).isdigit():
+            type_ahead_amount = TextWindow(self.stdscr, message = message).get_output()
+        return int(type_ahead_amount)
 
-    def unit_type(self):
-        question = 'Would you like to practice unit typing?'
-        options = ['No', 'Yes']
-        boolean_window =  SelectionWindow(self.stdscr, static_message = question, selection_list = options)
-        self.unit_type_bool = boolean_window.get_selected_row()
+    def get_hot_strings_mapping(self):
+        data = []
+        with open('../hot_strings/hot_strings.txt') as f:
+            lines = f.readlines()
+
+        hot_strings_mapping = {}
+        for hot_string in lines:
+            hot_string = hot_string.rstrip()
+            if len(hot_string.split('::')) == 3:
+                _, hs, word = hot_string.split('::')
+                hot_strings_mapping[word] = hs
+        return hot_strings_mapping
 
     def type_ahead_line(self, line):
         self.x = 0
@@ -321,19 +331,93 @@ class TypingApp:
             self.stdscr.move(self.y, self.x)
         return 'next line'
 
+    def get_hot_string_line(self, line):
+        hot_string_line = ''
+        for word in line.split():
+            if word in self.hot_strings_mapping:
+                space_amount = len(word) - len(self.hot_strings_mapping[word]) + 1
+                hot_string_line += self.hot_strings_mapping[word] + ' ' * space_amount
+            else:
+                hot_string_line += word + ' '
+        return hot_string_line
+
+    def type_hot_strings_line(self, line):
+        self.x = 0
+        self.stdscr.addstr(self.y, self.x, line) 
+        self.stdscr.move(self.y, self.x)
+        hot_string_line = self.get_hot_string_line(line)
+        self.stdscr.addstr(self.y + 1, self.x, hot_string_line) 
+        self.stdscr.move(self.y, self.x)
+        letters = ''
+        good_accuracy_word = [] # checks if every char was typed correctly
+        first_word_skip = True
+        unit_type = False
+        for idx, letter in enumerate(line): # loop where for typing
+            good_accuracy = True
+            char = self.stdscr.get_wch()
+            if idx == 0:
+                char_len = 1
+                start_word = timer()
+                start_time = timer()
+            while char != letter and char != '_':
+                if char == curses.KEY_DOWN:
+                    return 'next line'
+                if char == curses.KEY_UP:
+                    return 'prev line'
+                if char == curses.KEY_RIGHT:
+                    return 'next page'
+                if char == curses.KEY_LEFT:
+                    return 'prev page'
+                if char == '\x1b':
+                    return 'exit'
+                self.stdscr.addstr(self.y, self.x , letter, curses.color_pair(3))
+                self.stdscr.move(self.y, self.x)
+                char = self.stdscr.get_wch()
+                good_accuracy = False
+            end_time = timer()
+            delta = end_time - start_time
+            start_time = timer()
+            letters += letter
+            good_accuracy_word.append(good_accuracy)
+            if char == '_': # an autoskip for not typable char
+                char = letter
+
+            if char == ' ' or idx == len(line) - 1:
+                end_word = timer()
+                delta_word = end_word - start_word
+                wpm = str(round((60 / (delta_word / char_len))/5))
+                if not first_word_skip:
+                    if char_len > 2:
+                        self.stdscr.addstr(self.y+1, self.x-char_len + 1, wpm, curses.color_pair(2))
+                    self.word_time_log.append((letters, wpm, all(good_accuracy_word)))
+                first_word_skip = False
+                char_len = 1
+                letters = ''
+                good_accuracy_word = []
+                start_word = timer()
+            else:
+                char_len += 1
+            if self.x + 1 < len(line):
+                self.x += 1
+
+            self.stdscr.move(self.y, self.x)
+        return 'next line'
+
     def type_screen(self, screen):
         self.y, self.x = 0, 0
         self.stdscr.move(self.y, self.x)
         line_index, line_amount = 0, len(screen)
         while line_index < line_amount:
             line = screen[line_index]
-            if self.type_ahead_amount == 0:
-                if self.unit_type_bool:
-                    navigation_code = self.unit_type_line(line)
-                else:
-                    navigation_code = self.type_line(line)
-            else:
+            if self.typing_method == 'Normal':
+                navigation_code = self.type_line(line)
+            elif self.typing_method == 'Typing Ahead':
                 navigation_code = self.type_ahead_line(line)
+            elif self.typing_method == 'Unit Type':
+                navigation_code = self.unit_type_line(line)
+            elif self.typing_method == 'Hot Strings Type':
+                navigation_code = self.type_hot_strings_line(line)
+
             if navigation_code == 'exit':
                 return 'exit'
             elif navigation_code == 'next line':
